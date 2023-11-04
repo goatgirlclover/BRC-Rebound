@@ -1,5 +1,6 @@
 # Rebound
 A Hover-inspired plugin for Bomb Rush Cyberfunk that adds the Rebound, a timing-based trick that offers new air mobility options. 
+&NewLine;
 ![](https://github.com/scoopds/BRC-Rebound/blob/main/ref/showcase.gif?raw=true)
 ## Features
 * **Rebound**: Tap the jump button as soon as you land to launch right back into the air!
