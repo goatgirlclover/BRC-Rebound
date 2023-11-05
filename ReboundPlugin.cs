@@ -44,7 +44,7 @@ namespace Rebound
         public static float heightCapGenerosity = 1.5f; // m+ height cap offset
 
         public static bool alwaysCalculateBasedOnHeight = false; // (bounceCap)
-        public static bool canCancelCombo = true; // intended more for vanilla
+        public static bool canCancelCombo = false; // buggy and unfinished. intended more for vanilla
         public static bool refreshCombo = true; // set comboMeter to landingComboMeter on rebound
 
         public static bool allowBoostedRebounds = true;
@@ -89,7 +89,7 @@ namespace Rebound
 
         private void FixedUpdate()
         {
-            if (player != null) { // any code that needs to be run every frame
+            if (player != null && !player.isDisabled && !Core.Instance.BaseModule.IsInGamePaused) { // any code that needs to be run every frame
                 if (landTime < maxLandingTimeToRebound) { landTime += Reptile.Core.dt; } 
                 
                 if (!player.IsGrounded()) {
@@ -239,7 +239,8 @@ namespace Rebound
 
         public static bool ComboUpForGrabs() {
             bool mpluscombodone = MPlusActive ? player.comboTimeOutTimer <= 0 : true;
-            return mpluscombodone && player.ability != player.slideAbility && canCancelCombo;
+            return mpluscombodone && player.ability != player.slideAbility && canCancelCombo && !player.IsPerformingManualTrick && !player.slideAbility.locked
+            && player.ability != player.ledgeClimbAbility && player.switchMoveStyleAbility != player.ability;
         }
 
         private void OnDestroy() {
@@ -306,17 +307,6 @@ namespace Rebound
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(nameof(Player.FixedUpdatePlayer))]
-        public static bool FixedUpdatePlayer_UpdateComboTimer(Player __instance)
-        {
-            if (ReboundPlugin.CanRebound(__instance) && ReboundPlugin.ComboUpForGrabs() && !ReboundPlugin.MPlusActive && ReboundPlugin.allowReduceComboOnGround && __instance.IsComboing()) {
-                __instance.comboTimeOutTimer -= Reptile.Core.dt/ReboundPlugin.maxLandingTimeToRebound;
-                //if (player.comboTimeOutTimer <= 0) { CancelRebound(); }
-            }
-            return true;
-        }
-
-        [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.OnLanded))]
         public static bool OnLandedPrefix_ReboundVel(Player __instance) {
             ReboundPlugin.landTime = 0f;
@@ -341,7 +331,7 @@ namespace Rebound
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.LandCombo))]
         public static bool LandComboPrefix_ExtendForRebound(Player __instance) {
-            if (ReboundPlugin.CanRebound(__instance) && ReboundPlugin.canCancelCombo) {
+            if (ReboundPlugin.CanRebound(__instance) && !__instance.slideAbility.stopDecided) {
                 return false;
             }
             return true;
@@ -350,7 +340,7 @@ namespace Rebound
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.ActivateAbility))]
         public static bool AbilityPrefix_CancelRBIfSlide(Ability a, Player __instance) {
-            if (a != __instance.ability && a == __instance.slideAbility && ReboundPlugin.CanRebound(__instance) && ReboundPlugin.landTime > Reptile.Core.dt*3f) {
+            if (__instance.ability == null && a == __instance.slideAbility && ReboundPlugin.CanRebound(__instance) && ReboundPlugin.landTime > Reptile.Core.dt*3f) {
                 ReboundPlugin.CancelRebound();
             }
             return true;
@@ -386,7 +376,7 @@ namespace Rebound
         // Options
         private static ConfigEntry<bool> config_capBasedOnHeight;
         private static ConfigEntry<float> config_heightCapGenerosity;
-        private static ConfigEntry<bool> config_canCancelCombo;
+        //private static ConfigEntry<bool> config_canCancelCombo;
         private static ConfigEntry<bool> config_refreshCombo;
         private static ConfigEntry<bool> config_allowBoostedRebounds;
         private static ConfigEntry<bool> config_tempDisableBoost;
@@ -419,7 +409,7 @@ namespace Rebound
             ReboundPlugin.boostCost = config_boostCost.Value;
             ReboundPlugin.capBasedOnHeight = config_capBasedOnHeight.Value;
             ReboundPlugin.heightCapGenerosity = config_heightCapGenerosity.Value;
-            ReboundPlugin.canCancelCombo = config_canCancelCombo.Value;
+            //ReboundPlugin.canCancelCombo = config_canCancelCombo.Value;
             ReboundPlugin.refreshCombo = config_refreshCombo.Value;
             ReboundPlugin.alwaysCalculateBasedOnHeight = config_alwaysCalculateBasedOnHeight.Value;
             ReboundPlugin.allowBoostedRebounds = config_allowBoostedRebounds.Value;
@@ -519,11 +509,11 @@ namespace Rebound
                 1.5f,    // The default value
                 "How much extra speed is added to the height-based velocity cap. Note that this is not a multiplier, but an offset added to the height cap."); // Description of the option 
             
-            config_canCancelCombo = Config.Bind(
-                "2. Options",          // The section under which the option is shown
-                "Can Cancel Combo if Rebound Missed",     // The key of the configuration option in the configuration file
-                true,    // The default value
-                "Toggle whether the plugin is able to end your combo early if you choose not to rebound during the grace period. This option prevents you from artificially extending your combos by using the rebound period, but (ideally) should not mess with your combo in a way that doesn't match the vanilla rules. This option also extends your combo if you run out of meter before the grace period ends. Automatically adjusts to respect Movement Plus's combo tweaks if that mod is installed."); // Description of the option 
+            //config_canCancelCombo = Config.Bind(
+            //    "2. Options",          // The section under which the option is shown
+            //    "Can Cancel Combo if Rebound Missed",     // The key of the configuration option in the configuration file
+            //    true,    // The default value
+            //    "Toggle whether the plugin is able to end your combo early if you choose not to rebound during the grace period. This option prevents you from artificially extending your combos by using the rebound period, but (ideally) should not mess with your combo in a way that doesn't match the vanilla rules. This option also extends your combo if you run out of meter before the grace period ends. Automatically adjusts to respect Movement Plus's combo tweaks if that mod is installed."); // Description of the option 
             
             config_refreshCombo = Config.Bind(
                 "2. Options",          // The section under which the option is shown
