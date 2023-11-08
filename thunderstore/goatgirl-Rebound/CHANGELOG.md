@@ -1,4 +1,7 @@
-## v1.1.0
+## v1.1.1
+* Plugin now tries to ignore AI "players," hopefully fixing weird SlopCrew behavior
+
+### v1.1.0
 * Rebound velocity now follows the direction of sloped ground
     * Rebound on downward slopes to gain speed
     * Rebound on upward slopes to gain height

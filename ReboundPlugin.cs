@@ -89,7 +89,7 @@ namespace Rebound
 
         private void FixedUpdate()
         {
-            if (player != null && !player.isDisabled && !Core.Instance.BaseModule.IsInGamePaused) { // any code that needs to be run every frame
+            if (player != null && !player.isDisabled && !Core.Instance.BaseModule.IsInGamePaused && isPlayer(player)) { // any code that needs to be run every frame
                 if (landTime < maxLandingTimeToRebound) { landTime += Reptile.Core.dt; } 
                 
                 if (!player.IsGrounded()) {
@@ -125,51 +125,51 @@ namespace Rebound
             }
         }
 
-        public static bool CanRebound(Player player) {
-            return ReboundPlugin.landTime < maxLandingTimeToRebound && player.IsGrounded();
+        public static bool CanRebound(Player _p) {
+            return ReboundPlugin.landTime < maxLandingTimeToRebound && _p.IsGrounded();
         }
 
-        public static bool PlayerIsCancellingRebound(Player player) {
+        public static bool PlayerIsCancellingRebound(Player _p) {
             return actionsAreBeingPressed(cancelReboundActions, RBSettings.config_requireAllCRA.Value, player); 
         }
 
-        public static void ReboundTrick(Player player) {
-            bool isBoosting = allowBoostedRebounds ? player.boosting : false;
-            float floorAngle = (Vector3.Dot(Vector3.ProjectOnPlane(player.motor.groundNormalVisual, Vector3.up).normalized, player.dir));
+        public static void ReboundTrick(Player _p) {
+            bool isBoosting = allowBoostedRebounds ? _p.boosting : false;
+            float floorAngle = (Vector3.Dot(Vector3.ProjectOnPlane(_p.motor.groundNormalVisual, Vector3.up).normalized, _p.dir));
             
             // Force update animations to properly transition to jump/fall
-            player.animInfosSets[(int)player.moveStyle][Animator.StringToHash("jumpTrick1")].fadeTo[player.fallHash] = 1f;
-            player.animInfosSets[(int)player.moveStyle][Animator.StringToHash("jumpTrick1")].fadeTo[Animator.StringToHash("fallIdle")] = 1f;
+            _p.animInfosSets[(int)_p.moveStyle][Animator.StringToHash("jumpTrick1")].fadeTo[_p.fallHash] = 1f;
+            _p.animInfosSets[(int)_p.moveStyle][Animator.StringToHash("jumpTrick1")].fadeTo[Animator.StringToHash("fallIdle")] = 1f;
             
-            OnStartRebound(player); // Set up variables, play SFX/voice, particle effects
-            if (refreshCombo) { player.comboTimeOutTimer = landingComboMeter; }
+            OnStartRebound(_p); // Set up variables, play SFX/voice, particle effects
+            if (refreshCombo) { _p.comboTimeOutTimer = landingComboMeter; }
 
             // Calc initial rebound velocity
             Vector2 reboundVelocity = landingVelocity;
             reboundVelocity.y = -reboundVelocity.y*reboundVelocityMultiplier; 
             
             // Boosted or regular? Do trick animation and name accordingly
-            if (player.CheckBoostTrick() && allowBoostedRebounds) {
-                player.DoTrick(Player.TrickType.AIR, "Boosted Rebound", 0);
-                player.ActivateAbility(player.airTrickAbility);
-                reboundVelocity.x = Mathf.Max(reboundVelocity.x, player.GetForwardSpeed());
+            if (_p.CheckBoostTrick() && allowBoostedRebounds) {
+                _p.DoTrick(Player.TrickType.AIR, "Boosted Rebound", 0);
+                _p.ActivateAbility(_p.airTrickAbility);
+                reboundVelocity.x = Mathf.Max(reboundVelocity.x, _p.GetForwardSpeed());
 
             } else { 
                 if (tempDisableBoost) {
-                    player.ActivateAbility(player.airTrickAbility);
-                    player.airTrickAbility.duration /= 3f;
-                    player.PlayAnim(Animator.StringToHash("jumpTrick1"), true, true, -1f);
+                    _p.ActivateAbility(_p.airTrickAbility);
+                    _p.airTrickAbility.duration /= 3f;
+                    _p.PlayAnim(Animator.StringToHash("jumpTrick1"), true, true, -1f);
                 }
                 
                 string normalTrickName = "Corkscrew";
-                if (player.moveStyle == MoveStyle.BMX) { normalTrickName = "360 Backflip"; }
-                if (player.moveStyle == MoveStyle.SKATEBOARD) { normalTrickName = "McTwist"; }
-                player.DoTrick(Player.TrickType.AIR, "Rebound " + normalTrickName, 0); 
+                if (_p.moveStyle == MoveStyle.BMX) { normalTrickName = "360 Backflip"; }
+                if (_p.moveStyle == MoveStyle.SKATEBOARD) { normalTrickName = "McTwist"; }
+                _p.DoTrick(Player.TrickType.AIR, "Rebound " + normalTrickName, 0); 
                 }
 
             // Counteract M+ fast fall - bounceCap should not EVER be run into in vanilla
             float targetHeight = (distanceFallenFromPeakOfJump*reboundVelocityMultiplier); // how high a rebound SHOULD be taking you
-            float reboundCalculatedByHeight = Mathf.Sqrt(2f * targetHeight * player.motor.gravity); // velocity to get to said height
+            float reboundCalculatedByHeight = Mathf.Sqrt(2f * targetHeight * _p.motor.gravity); // velocity to get to said height
             float bounceCap = (reboundCalculatedByHeight/9f) + heightCapGenerosity; // why divide by nine? i dunno, but it works!
 
             if (!alwaysCalculateBasedOnHeight && capBasedOnHeight) {
@@ -179,9 +179,9 @@ namespace Rebound
             }
             
             // Rebound off launcher bonus
-            if (player.onLauncher) { 
+            if (_p.onLauncher) { 
                 if (!RBSettings.config_slopeOnLauncher.Value) { floorAngle = 0f; }
-                float launcherBonus = player.onLauncher.parent.gameObject.name.Contains("Super") ? player.jumpSpeedLauncher * 1.4f : player.jumpSpeedLauncher;
+                float launcherBonus = _p.onLauncher.parent.gameObject.name.Contains("Super") ? _p.jumpSpeedLauncher * 1.4f : _p.jumpSpeedLauncher;
                 reboundVelocity.y = Mathf.Max(reboundVelocity.y + (launcherBonus*launcherBonusMultiplier), launcherBonus); //launcher bonus multiplier should be configurable
             }
 
@@ -198,50 +198,50 @@ namespace Rebound
             if (floorAngleXY.x < 0f) { floorAngleXY.y += 1f; } // higher instead of lower
             //floorAngleXY.y = Mathf.Lerp(floorAngleXY.y, 1f, 0.5f);
 
-            player.motor.SetVelocityYOneTime(reboundVelocity.y * floorAngleXY.y);
+            _p.motor.SetVelocityYOneTime(reboundVelocity.y * floorAngleXY.y);
             float newForwardSpeed = reboundVelocity.x + (reboundVelocity.y * floorAngleXY.x);
-            player.SetForwardSpeed(newForwardSpeed);
+            _p.SetForwardSpeed(newForwardSpeed);
             if (newForwardSpeed < 0f) {
-                player.SetRotation(-player.dir);
+                _p.SetRotation(-_p.dir);
             }
             
             // Handle combo
-            float oldComboTimer = player.comboTimeOutTimer;
+            float oldComboTimer = _p.comboTimeOutTimer;
             if (comboCost != 0f) { 
-                if ((player.comboTimeOutTimer - comboCost) > 1f) {
-                    player.ResetComboTimeOut();
+                if ((_p.comboTimeOutTimer - comboCost) > 1f) {
+                    _p.ResetComboTimeOut();
                 } else {
-                    player.DoComboTimeOut(comboCost);
-                    player.comboTimeOutTimer = Mathf.Clamp(player.comboTimeOutTimer, 0f, 1f); 
+                    _p.DoComboTimeOut(comboCost);
+                    _p.comboTimeOutTimer = Mathf.Clamp(_p.comboTimeOutTimer, 0f, 1f); 
                 }
             }
-            if (player.comboTimeOutTimer == 0f && oldComboTimer == player.comboTimeOutTimer) { player.LandCombo(); }
+            if (_p.comboTimeOutTimer == 0f && oldComboTimer == _p.comboTimeOutTimer) { _p.LandCombo(); }
 
-            if (boostCost != 0f) { player.AddBoostCharge(-boostCost); }
+            if (boostCost != 0f) { _p.AddBoostCharge(-boostCost); }
         }
 
-        public static void OnStartRebound(Player player) {
-            bool isBoosting = allowBoostedRebounds ? player.boosting : false;
+        public static void OnStartRebound(Player _p) {
+            bool isBoosting = allowBoostedRebounds ? _p.boosting : false;
 
-            if (!isBoosting) { player.StopCurrentAbility(); }
+            if (!isBoosting) { _p.StopCurrentAbility(); }
             
-            player.jumpedThisFrame = true;
-            player.isJumping = true;
-            player.maintainSpeedJump = true;
-            player.jumpConsumed = true;
-            player.jumpRequested = false;
-            player.jumpedThisFrame = true;
-            player.timeSinceLastJump = 0f;
-            player.ForceUnground(true);
-            player.radialHitbox.SetActive(true);
+            _p.jumpedThisFrame = true;
+            _p.isJumping = true;
+            _p.maintainSpeedJump = true;
+            _p.jumpConsumed = true;
+            _p.jumpRequested = false;
+            _p.jumpedThisFrame = true;
+            _p.timeSinceLastJump = 0f;
+            _p.ForceUnground(true);
+            _p.radialHitbox.SetActive(true);
             
-            player.AudioManager.PlaySfxGameplay(SfxCollectionID.GenericMovementSfx, AudioClipID.jump_special, player.playerOneShotAudioSource, 0f);
-            player.PlayVoice(AudioClipID.VoiceJump, VoicePriority.MOVEMENT, true);
-            if (!isBoosting) { player.PlayAnim(Animator.StringToHash("jumpTrick1"), true, false, -1f); }
-            else { player.PlayAnim(Animator.StringToHash("jump"), true, false, -1f); }
+            _p.AudioManager.PlaySfxGameplay(SfxCollectionID.GenericMovementSfx, AudioClipID.jump_special, _p.playerOneShotAudioSource, 0f);
+            _p.PlayVoice(AudioClipID.VoiceJump, VoicePriority.MOVEMENT, true);
+            if (!isBoosting) { _p.PlayAnim(Animator.StringToHash("jumpTrick1"), true, false, -1f); }
+            else { _p.PlayAnim(Animator.StringToHash("jump"), true, false, -1f); }
            
-            player.DoHighJumpEffects(player.motor.groundNormalVisual * -1f);
-            //player.ringParticles.Emit(1);
+            _p.DoHighJumpEffects(_p.motor.groundNormalVisual * -1f);
+            //_p.ringParticles.Emit(1);
         }
 
         public static void CancelRebound() {
@@ -269,6 +269,10 @@ namespace Rebound
             }
             return returnValue;      
         }
+
+        public static bool isPlayer(Player _p) {
+            return (_p == WorldHandler.instance?.GetCurrentPlayer() && !_p.isAI);
+        }
     }
 
     [HarmonyPatch(typeof(Player))]
@@ -278,7 +282,7 @@ namespace Rebound
         [HarmonyPatch(nameof(Player.Init))]
         public static bool InitPrefix_SetPluginPlayerReference(Player __instance)
         {
-            if (ReboundPlugin.player == null)
+            if (ReboundPlugin.player == null && ReboundPlugin.isPlayer(__instance))
             {
                 ReboundPlugin.player = __instance;
                 ReboundPlugin.Log.LogDebug($"Set ReboundPlugin player instance");
@@ -291,6 +295,8 @@ namespace Rebound
         [HarmonyPatch(nameof(Player.HandleJump))]
         public static bool HandleJumpPrefix_HandleRebound(Player __instance)
         {
+            if (!ReboundPlugin.isPlayer(__instance)) { return true; }
+
             PlayerPatches.InitPrefix_SetPluginPlayerReference(__instance); // for testing - quickly get player reference in case we reloaded the plugin with scriptengine and the reference is lost
             RBSettings.SetSettingsInPlugin(); // allow live config update
             
@@ -321,6 +327,8 @@ namespace Rebound
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.OnLanded))]
         public static bool OnLandedPrefix_ReboundVel(Player __instance) {
+            if (!ReboundPlugin.isPlayer(__instance)) { return true; }
+            
             ReboundPlugin.landTime = 0f;
             ReboundPlugin.distanceFallenFromPeakOfJump += __instance.reallyMovedVelocity.y; // adds "velocity" from frame before that probably isn't caught. make sure this works the way we want it to!
             //ReboundPlugin.groundedPositionY = __instance.tf.position.y;
@@ -331,6 +339,8 @@ namespace Rebound
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.DoTrick))]
         public static bool DoTrickPrefix_FailIfNotRebound(Player.TrickType type, string trickName, int trickNum, Player __instance) {
+            if (!ReboundPlugin.isPlayer(__instance)) { return true; }
+
             // if can rebound and choosing not to, drop combo
             if (ReboundPlugin.CanRebound(__instance) && !(trickName.Contains("Rebound") && trickNum == 0 && type == Player.TrickType.AIR)) {
                 if (ReboundPlugin.landTime > Reptile.Core.dt && !(__instance.currentTrickType == Player.TrickType.SLIDE && type == Player.TrickType.SLIDE)) {
@@ -343,15 +353,16 @@ namespace Rebound
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.LandCombo))]
         public static bool LandComboPrefix_ExtendForRebound(Player __instance) {
-            if (ReboundPlugin.CanRebound(__instance) && !__instance.slideAbility.stopDecided) {
-                return false;
-            }
-            return true;
+            if (!ReboundPlugin.isPlayer(__instance)) { return true; }
+            
+            return (!(ReboundPlugin.CanRebound(__instance) && !__instance.slideAbility.stopDecided));
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.ActivateAbility))]
         public static bool AbilityPrefix_CancelRBIfSlide(Ability a, Player __instance) {
+            if (!ReboundPlugin.isPlayer(__instance)) { return true; }
+
             if (__instance.ability == null && a == __instance.slideAbility && ReboundPlugin.CanRebound(__instance) && ReboundPlugin.landTime > Reptile.Core.dt*3f) {
                 ReboundPlugin.CancelRebound();
             }
