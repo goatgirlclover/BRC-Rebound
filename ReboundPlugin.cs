@@ -80,7 +80,7 @@ namespace Rebound
                 if (plugin.Value.Metadata.GUID.Equals("com.yuril.MovementPlus"))
                 { 
                     MPlusActive = true; 
-                    Log.LogInfo($"MovementPlus found!");
+                    Log.LogInfo($"Rebound: MovementPlus found!");
                 }
             }
 
@@ -104,10 +104,10 @@ namespace Rebound
                     }
 
 
-                } else if (CanRebound(player) && ComboUpForGrabs() && !MPlusActive && allowReduceComboOnGround && player.IsComboing()) {
-                    player.comboTimeOutTimer -= Reptile.Core.dt/maxLandingTimeToRebound;
-                    //if (player.comboTimeOutTimer <= 0) { CancelRebound(); }
-                }
+                } //else if (CanRebound(player) && ComboUpForGrabs() && !MPlusActive && allowReduceComboOnGround && player.IsComboing()) {
+                //    player.comboTimeOutTimer -= Reptile.Core.dt/maxLandingTimeToRebound;
+               //     //if (player.comboTimeOutTimer <= 0) { CancelRebound(); }
+              //  }
 
                 // this is an AWFUL way of doing this but reflection/getfield() isn't working, so it'll have to do for now...
                 playerActionsDictionary = new Dictionary<string, bool> {
@@ -135,6 +135,7 @@ namespace Rebound
 
         public static void ReboundTrick(Player player) {
             bool isBoosting = allowBoostedRebounds ? player.boosting : false;
+            float floorAngle = (Vector3.Dot(Vector3.ProjectOnPlane(player.motor.groundNormalVisual, Vector3.up).normalized, player.dir));
             
             // Force update animations to properly transition to jump/fall
             player.animInfosSets[(int)player.moveStyle][Animator.StringToHash("jumpTrick1")].fadeTo[player.fallHash] = 1f;
@@ -145,7 +146,7 @@ namespace Rebound
 
             // Calc initial rebound velocity
             Vector2 reboundVelocity = landingVelocity;
-            reboundVelocity.y = -reboundVelocity.y*reboundVelocityMultiplier; //reboundVelocityMultiplier should be configurable
+            reboundVelocity.y = -reboundVelocity.y*reboundVelocityMultiplier; 
             
             // Boosted or regular? Do trick animation and name accordingly
             if (player.CheckBoostTrick() && allowBoostedRebounds) {
@@ -170,7 +171,7 @@ namespace Rebound
             float targetHeight = (distanceFallenFromPeakOfJump*reboundVelocityMultiplier); // how high a rebound SHOULD be taking you
             float reboundCalculatedByHeight = Mathf.Sqrt(2f * targetHeight * player.motor.gravity); // velocity to get to said height
             float bounceCap = (reboundCalculatedByHeight/9f) + heightCapGenerosity; // why divide by nine? i dunno, but it works!
-            //Log.LogInfo(bounceCap + ", " + reboundVelocity.y);
+
             if (!alwaysCalculateBasedOnHeight && capBasedOnHeight) {
                 reboundVelocity.y = Mathf.Min(reboundVelocity.y, bounceCap);
             } else if (alwaysCalculateBasedOnHeight) {
@@ -179,6 +180,7 @@ namespace Rebound
             
             // Rebound off launcher bonus
             if (player.onLauncher) { 
+                if (!RBSettings.config_slopeOnLauncher.Value) { floorAngle = 0f; }
                 float launcherBonus = player.onLauncher.parent.gameObject.name.Contains("Super") ? player.jumpSpeedLauncher * 1.4f : player.jumpSpeedLauncher;
                 reboundVelocity.y = Mathf.Max(reboundVelocity.y + (launcherBonus*launcherBonusMultiplier), launcherBonus); //launcher bonus multiplier should be configurable
             }
@@ -189,12 +191,22 @@ namespace Rebound
             if (reboundVelocity.y > maximumReboundYVelocity && maximumReboundYVelocity != 0) {
                 reboundVelocity.x = maximumReboundYVelocity * (reboundVelocity.x/reboundVelocity.y); // reduce speed to follow same arc
                 reboundVelocity.y = maximumReboundYVelocity;
-                //Log.LogInfo($"Hit maximum bounce height! " + bounceCap + ", " + groundedPositionY + ", " + positionYDiff);
             }
 
-            player.motor.SetVelocityYOneTime(reboundVelocity.y);
-            player.SetForwardSpeed(reboundVelocity.x);
+            // Adjust velocity based on floor normal
+            Vector2 floorAngleXY = new Vector2 (Mathf.Sin(floorAngle)*(RBSettings.config_slopeMultiplierX.Value), Mathf.Cos(floorAngle)*(RBSettings.config_slopeMultiplierY.Value));
+            if (floorAngleXY.x < 0f) { floorAngleXY.y += 1f; } // higher instead of lower
+            //floorAngleXY.y = Mathf.Lerp(floorAngleXY.y, 1f, 0.5f);
 
+            player.motor.SetVelocityYOneTime(reboundVelocity.y * floorAngleXY.y);
+            float newForwardSpeed = reboundVelocity.x + (reboundVelocity.y * floorAngleXY.x);
+            player.SetForwardSpeed(newForwardSpeed);
+            if (newForwardSpeed < 0f) {
+                player.SetRotation(-player.dir);
+            }
+            
+            // Handle combo
+            float oldComboTimer = player.comboTimeOutTimer;
             if (comboCost != 0f) { 
                 if ((player.comboTimeOutTimer - comboCost) > 1f) {
                     player.ResetComboTimeOut();
@@ -203,6 +215,7 @@ namespace Rebound
                     player.comboTimeOutTimer = Mathf.Clamp(player.comboTimeOutTimer, 0f, 1f); 
                 }
             }
+            if (player.comboTimeOutTimer == 0f && oldComboTimer == player.comboTimeOutTimer) { player.LandCombo(); }
 
             if (boostCost != 0f) { player.AddBoostCharge(-boostCost); }
         }
@@ -268,7 +281,7 @@ namespace Rebound
             if (ReboundPlugin.player == null)
             {
                 ReboundPlugin.player = __instance;
-                //ReboundPlugin.Log.LogDebug($"Set ReboundPlugin player instance");
+                ReboundPlugin.Log.LogDebug($"Set ReboundPlugin player instance");
             }
             //RBSettings.UpdateSettings(ReboundPlugin.Config);
             return true;
@@ -279,7 +292,7 @@ namespace Rebound
         public static bool HandleJumpPrefix_HandleRebound(Player __instance)
         {
             PlayerPatches.InitPrefix_SetPluginPlayerReference(__instance); // for testing - quickly get player reference in case we reloaded the plugin with scriptengine and the reference is lost
-            RBSettings.SetSettingsInPlugin(); // again, for testing w/ scriptengine
+            RBSettings.SetSettingsInPlugin(); // allow live config update
             
             __instance.jumpedThisFrame = false;
             __instance.timeSinceJumpRequested += Reptile.Core.dt;
@@ -287,9 +300,8 @@ namespace Rebound
             // simplified JumpIsAllowed check for rebound - bypasses any ability checks
             if (__instance.jumpRequested && !__instance.jumpConsumed && (__instance.IsGrounded() || __instance.timeSinceLastAbleToJump <= __instance.JumpPostGroundingGraceTime)) {            
                 bool doingRBActions = ReboundPlugin.doReboundActions.Any() ? ReboundPlugin.actionsAreBeingPressed(ReboundPlugin.doReboundActions, RBSettings.config_requireAllDRA.Value, __instance) : true;
-                ReboundPlugin.Log.LogInfo(doingRBActions);
                 
-                if (ReboundPlugin.landingVelocity.y < -ReboundPlugin.minimumVelocityToRebound 
+                if (ReboundPlugin.landingVelocity.y < -ReboundPlugin.minimumVelocityToRebound
                 && ReboundPlugin.CanRebound(__instance) 
                 && !ReboundPlugin.PlayerIsCancellingRebound(__instance)
                 && doingRBActions) { 
@@ -372,6 +384,9 @@ namespace Rebound
         private static ConfigEntry<float> config_launcherBonusMultiplier;
         private static ConfigEntry<float> config_comboCost;
         private static ConfigEntry<float> config_boostCost;
+
+        public static ConfigEntry<float> config_slopeMultiplierX;
+        public static ConfigEntry<float> config_slopeMultiplierY;
         
         // Options
         private static ConfigEntry<bool> config_capBasedOnHeight;
@@ -381,18 +396,18 @@ namespace Rebound
         private static ConfigEntry<bool> config_allowBoostedRebounds;
         private static ConfigEntry<bool> config_tempDisableBoost;
         private static ConfigEntry<bool> config_alwaysCalculateBasedOnHeight;
-        private static ConfigEntry<bool> config_allowReduceComboOnGround;
+        //private static ConfigEntry<bool> config_allowReduceComboOnGround;
 
+        public static ConfigEntry<bool> config_slopeOnLauncher;
+
+        // Input
         private static ConfigEntry<string> config_cancelReboundActions;
         private static ConfigEntry<string> config_doReboundActions;
         
         public static ConfigEntry<bool> config_requireAllDRA;
         public static ConfigEntry<bool> config_requireAllCRA;
 
-        // Input
-        // blahblahblah
         
-
         public static void UpdateSettings(ConfigFile Config) {
             BindSettings(Config);
             SetSettingsInPlugin();
@@ -414,7 +429,7 @@ namespace Rebound
             ReboundPlugin.alwaysCalculateBasedOnHeight = config_alwaysCalculateBasedOnHeight.Value;
             ReboundPlugin.allowBoostedRebounds = config_allowBoostedRebounds.Value;
             ReboundPlugin.tempDisableBoost = config_tempDisableBoost.Value;
-            ReboundPlugin.allowReduceComboOnGround = config_allowReduceComboOnGround.Value;
+            //ReboundPlugin.allowReduceComboOnGround = config_allowReduceComboOnGround.Value;
 
             ReboundPlugin.cancelReboundActions = ConvertString(config_cancelReboundActions.Value, PlayerActionTypes);
             ReboundPlugin.doReboundActions = ConvertString(config_doReboundActions.Value, PlayerActionTypes);
@@ -462,7 +477,7 @@ namespace Rebound
             config_minimumVelocityToRebound = Config.Bind(
                 "1. Variables",          // The section under which the option is shown
                 "Minimum Falling Velocity to Rebound",     // The key of the configuration option in the configuration file
-                4f,    // The default value
+                0f,    // The default value
                 "How fast you have to be falling to be able to do a rebound. (For reference, 8 is the player's jump height)"); // Description of the option 
 
             config_minimumReboundYVelocity = Config.Bind(
@@ -494,8 +509,18 @@ namespace Rebound
                 "Boost Meter Cost",     // The key of the configuration option in the configuration file
                 0f,    // The default value
                 "How much boost meter it costs to do a rebound. Set to a negative number to gain boost after every rebound."); // Description of the option 
+
+            config_slopeMultiplierX = Config.Bind(
+                "1. Variables",          // The section under which the option is shown
+                "Ground Angle Multiplier on Forward Speed",     // The key of the configuration option in the configuration file
+                1f,    // The default value
+                "How much the angle of the ground you rebound off affects your forward speed. Speeds up on downward slopes, slows down on upward slopes. Note that you will automatically be flipped over if the slope sends you backwards."); // Description of the option 
             
-            
+            config_slopeMultiplierY = Config.Bind(
+                "1. Variables",          // The section under which the option is shown
+                "Ground Angle Multiplier on Upward Speed",     // The key of the configuration option in the configuration file
+                1f,    // The default value
+                "How much the angle of the ground you rebound off affects your rebound height. Higher on upward slopes, lower on downward slopes. Not restricted by minimum/maximum rebound height."); // Description of the option 
             
             config_capBasedOnHeight = Config.Bind(
                 "2. Options",          // The section under which the option is shown
@@ -539,12 +564,20 @@ namespace Rebound
                 false,    // The default value
                 "Always set the rebound velocity to the height-based velocity cap, regardless of the player's falling velocity. Note that this method tends to send you slightly higher, and also may be less accurate with mid-jump velocity changes (ex. wall plants or air boosts). However, this does allow you to bypass the fall speed limitations. Highly recommended to leave on false."); // Description of the option 
         
-            config_allowReduceComboOnGround = Config.Bind(
-                "2. Options",          // The section under which the option is shown
-                "Allow Reduce Combo On Ground (Vanilla Only)",     // The key of the configuration option in the configuration file
-                true,    // The default value
-                "Allow the plugin to slowly reduce your combo meter while on the ground within the rebound grace period. If Refresh Combo Meter is on, this is solely a visual thing. Vanilla only - has no effect if Movement Plus is installed."); // Description of the option 
+            // no effect without CanCancelCombo (which is not implemented)
+            //config_allowReduceComboOnGround = Config.Bind(
+            //    "2. Options",          // The section under which the option is shown
+            //    "Allow Reduce Combo On Ground (Vanilla Only)",     // The key of the configuration option in the configuration file
+            //    true,    // The default value
+            //    "Allow the plugin to slowly reduce your combo meter while on the ground within the rebound grace period. If Refresh Combo Meter is on, this is solely a visual thing. Vanilla only - has no effect if Movement Plus is installed."); // Description of the option 
         
+            config_slopeOnLauncher = Config.Bind(
+                "2. Options",          // The section under which the option is shown
+                "Apply Slope Physics when Rebounding off Launcher",     // The key of the configuration option in the configuration file
+                false,    // The default value
+                "If false, rebounding off a launcher will act like you have rebounded off of flat ground. If true, rebounding off a launcher will send you at an angle. Note that this can and will send you flying in directions you may not want - but it also could be used to your advantage to get insane height/speed."); // Description of the option 
+        
+            
             
             
             config_doReboundActions = Config.Bind(
