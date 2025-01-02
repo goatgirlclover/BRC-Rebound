@@ -52,6 +52,10 @@ namespace Rebound
 
         public static ConfigEntry<bool> config_slopeOnLauncher;
 
+        public static ConfigEntry<bool> config_preventComboExtend;
+        public static ConfigEntry<float> config_trailLength;
+        public static ConfigEntry<float> config_trailWidth;
+
         // Input
         private static ConfigEntry<string> config_cancelReboundActions;
         private static ConfigEntry<string> config_doReboundActions;
@@ -210,7 +214,7 @@ namespace Rebound
             */
             config_tempDisableBoostAfterRebound = Config.Bind(
                 "2. Options",          // The section under which the option is shown
-                "Can Temporarily Disable Boost",     // The key of the configuration option in the configuration file
+                "Temporarily Disable Boost on Rebound",     // The key of the configuration option in the configuration file
                 true,    // The default value
                 "Toggle whether doing a rebound stops you from boosting until the trick is done. Does not affect Boosted Rebounds."); // Description of the option 
             
@@ -233,9 +237,11 @@ namespace Rebound
                 false,    // The default value
                 "If false, rebounding off a launcher will act like you have rebounded off of flat ground. If true, rebounding off a launcher will send you at an angle. Note that this can and will send you flying in directions you may not want - but it also could be used to your advantage to get insane height/speed."); // Description of the option 
         
+            config_preventComboExtend = Config.Bind("2. Options", "Prevent Combo Extension", true, "Prevents using the Rebound grace period to artificially extend combos by detecting if an action other than a Rebound is taken during the period and cancelling the combo accordingly. If using MovementPlus, this does not apply until the combo meter runs out while on the ground.");
             
-            
-            
+            config_trailLength = Config.Bind("2. Options", "Trail Time", 3f, "Affects how long the Rebound trail lasts. Note that this time is adjusted depending on the height of the Rebound. The default value reflects the approximate time at the peak of a Rebound.");
+            config_trailWidth = Config.Bind("2. Options", "Trail Width", 0.25f, "Affects how big the Rebound trail starts off as.");
+
             config_doReboundActions = Config.Bind(
                 "3. Input",          // The section under which the option is shown
                 "Rebound Modifier Actions",     // The key of the configuration option in the configuration file
@@ -260,8 +266,6 @@ namespace Rebound
                 "Require ALL Cancel Rebound Modifiers to Cancel",     // The key of the configuration option in the configuration file
                 false,    // The default value
                 "If true, the player must press/hold ALL the cancel modifier actions to cancel a rebound. If false, the player can hold ANY of them to cancel a rebound."); // Description of the option 
-              
-            
             
               config_reboundVelocityMultiplier.SettingChanged += UpdateSettingsEvent;
               config_maxLandingTimeToRebound.SettingChanged += UpdateSettingsEvent;
