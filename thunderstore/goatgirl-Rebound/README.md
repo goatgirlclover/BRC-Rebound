@@ -3,9 +3,11 @@ A Hover-inspired plugin for Bomb Rush Cyberfunk that adds the Rebound, a timing-
 
 **Note:** If playing with MovementPlus 3.0, for better compatibility with the **Wave Dash** move, either:
 - lower the Rebound grace period and increase the Wave Dash grace period - tapping quickly results in a Rebound, and tapping slower results in a Wave Dash
-    - Rebound overrides Wave Dash, so the Rebound grace period must always be lower than the Wave Dash grace period 
+    - Rebound overrides Wave Dash, so *the Rebound grace period must always be lower than the Wave Dash grace period*
 - use a Rebound Modifier Action in the config file to require holding another action to Rebound
     - For example, using "trickAny" as a Rebound Modifier will require holding any of the trick buttons, as well as pressing jump, to Rebound
+    - On an Xbox controller, trick1 is X, trick2 is Y, and trick3 is B
+    - Jumping within this window without holding a Rebound Modifier Action results in a Wave Dash instead
 
 ## Features
 * **Rebound**: Tap the jump button as soon as you land to launch right back into the air!

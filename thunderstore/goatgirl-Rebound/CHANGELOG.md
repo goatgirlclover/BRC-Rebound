@@ -1,5 +1,5 @@
 ## 2.0.0 (New Year Update)
-* **New configuration option:** Prevent Combo Extension (enabled by default)
+* New configuration option: Prevent Combo Extension (enabled by default)
     * Prevents using a long grace period to artificially extend combos
     * Detects if an action other than a Rebound is taken during the grace period and cancels the combo accordingly
     * If using MovementPlus, this does not apply until the combo meter runs out while on the ground
@@ -12,6 +12,7 @@
 * Removed configuration options: Combo Meter Cost, Boost Meter Cost, Allow Boosted Rebounds
     * Boosted Rebounds are now always allowed
     * **Combo meter cost has been slightly increased** from the original default (no boost cost)
+* Updated mod icon
 
 ## 1.1.1
 * Plugin now tries to ignore AI "players," hopefully fixing weird SlopCrew behavior
@@ -30,5 +31,5 @@
 * Disabled an unused config option
 * Removed annoying console logs
 
-# 1.0.0
+## 1.0.0
 * Initial release 
