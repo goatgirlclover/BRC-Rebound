@@ -2,7 +2,7 @@
     "name":"Rebound",
     "version_number":"2.0.0",
     "description":"Tap the jump button as soon as you land to launch right back into the air!",
-    "website_url":"https://github.com/scoopds/BRC-Rebound",
+    "website_url":"https://github.com/goatgirlclover/BRC-Rebound",
 
     "dependencies":["BepInEx-BepInExPack-5.4.2100"],
     "incompatibilities":[],
