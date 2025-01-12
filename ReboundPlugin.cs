@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Rebound
 {   
-    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.0.1")]
+    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.1.0")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     [BepInDependency("com.yuril.MovementPlus", BepInDependency.DependencyFlags.SoftDependency)]
     public class ReboundPlugin : BaseUnityPlugin
@@ -54,8 +54,7 @@ namespace Rebound
         
         public static float reboundTrailTime { get { return RBSettings.config_trailLength.Value + 0.000125f; } }
         public static float reboundTrailWidth { get { return RBSettings.config_trailWidth.Value + 0.000125f; } }
-        public static float originalTrailTime; 
-        public static float originalTrailWidth;
+        public static bool rebounding = false;
 
         private void Awake()
         {
@@ -97,10 +96,13 @@ namespace Rebound
 
             //if (player.ability == player.slideAbility) { landTime = float.PositiveInfinity; }
 
-            if (player.boostpackTrailDefaultTime == reboundTrailTime && (player.boostTrailTimer == 0f)) {
+            /*if (player.boostpackTrailDefaultTime == reboundTrailTime && (player.boostTrailTimer == 0f)) {
                 player.boostpackTrailDefaultTime = originalTrailTime;
                 player.boostpackTrailDefaultWidth = originalTrailWidth;
-            } else if (player.boostpackTrailDefaultWidth == reboundTrailWidth) {
+            } else if (player.boostpackTrailDefaultWidth == reboundTrailWidth) {*/
+
+            if (rebounding && player.boostTrailTimer <= 0f) { rebounding = false; }
+            else if (rebounding) {
                 player.boostTrailTimer += Mathf.Min(Core.dt, player.GetVelocity().y/500f)*6f; 
                 player.trailWidth += Mathf.Min(Core.dt, player.GetVelocity().y/500f); 
             }
@@ -193,7 +195,7 @@ namespace Rebound
             //if (boostCost != 0f) { player.AddBoostCharge(-boostCost); }
 
             // Extend trail effect
-            if (player.boostpackTrailDefaultTime < reboundTrailTime) {
+            /*if (player.boostpackTrailDefaultTime < reboundTrailTime) {
                 originalTrailTime = player.boostpackTrailDefaultTime; 
                 originalTrailWidth = player.boostpackTrailDefaultWidth;
                 player.boostpackTrailDefaultTime = reboundTrailTime;
@@ -201,7 +203,13 @@ namespace Rebound
             } 
             
             player.boostTrailTimer = player.boostpackTrailDefaultTime;
-            player.trailWidth = player.boostpackTrailDefaultWidth;  
+            player.trailWidth = player.boostpackTrailDefaultWidth;  */
+
+            if (RBSettings.config_enableTrail.Value) {
+                player.boostTrailTimer = reboundTrailTime;
+                player.trailWidth = reboundTrailWidth;
+                rebounding = true;
+            }
         }
 
         public static void PrepForRebound() {

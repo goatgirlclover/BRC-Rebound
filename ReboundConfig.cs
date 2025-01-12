@@ -53,6 +53,8 @@ namespace Rebound
         public static ConfigEntry<bool> config_slopeOnLauncher;
 
         public static ConfigEntry<bool> config_preventComboExtend;
+
+        public static ConfigEntry<bool> config_enableTrail;
         public static ConfigEntry<float> config_trailLength;
         public static ConfigEntry<float> config_trailWidth;
 
@@ -239,6 +241,7 @@ namespace Rebound
         
             config_preventComboExtend = Config.Bind("2. Options", "Prevent Combo Extension", true, "Prevents using the Rebound grace period to artificially extend combos by detecting if an action other than a Rebound is taken during the period and cancelling the combo accordingly. If using MovementPlus, this does not apply until the combo meter runs out while on the ground.");
             
+            config_enableTrail = Config.Bind("2. Options", "Enable Rebound Trail", true, "Toggle the extended boost trail effect when Rebounding.");
             config_trailLength = Config.Bind("2. Options", "Trail Time", 3f, "Affects how long the Rebound trail lasts. Note that this time is adjusted depending on the height of the Rebound. The default value reflects the approximate time at the peak of a Rebound.");
             config_trailWidth = Config.Bind("2. Options", "Trail Width", 0.25f, "Affects how big the Rebound trail starts off as.");
 
