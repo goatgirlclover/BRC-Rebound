@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Rebound
 {   
-    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.1.0")]
+    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.1.1")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     [BepInDependency("com.yuril.MovementPlus", BepInDependency.DependencyFlags.SoftDependency)]
     public class ReboundPlugin : BaseUnityPlugin

@@ -3,6 +3,7 @@
     * Intended to fix random Rebounds and the grace period being extended occasionally; however, these issues may have stuck around, so let me know if there's still any weird behavior!
 * Fixed the Rebound trail breaking the boost trail after being activated
 * The Rebound trail can now be disabled in the configuration file
+* (2.1.1) Fixed a syntax error that made some patches apply to AI players
 
 ## 2.0.1
 * Fixed a regression that broke using slide as a Rebound Modifier Action

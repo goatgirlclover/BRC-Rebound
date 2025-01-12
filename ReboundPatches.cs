@@ -19,7 +19,7 @@ namespace Rebound
         [HarmonyPatch(nameof(Player.HandleJump))]
         public static bool HandleJumpPrefix_TriggerRebound(Player __instance)
         {
-            if (!__instance == ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
+            if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
             
             __instance.jumpedThisFrame = false;
             __instance.timeSinceJumpRequested += Reptile.Core.dt;
@@ -49,7 +49,7 @@ namespace Rebound
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.OnLanded))]
         public static bool OnLandedPrefix_ReboundDistance(Player __instance) {
-            if (!__instance == ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
+            if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
             ReboundPlugin.rebounding = false;
             
             //__instance.boostpackTrailDefaultTime = ReboundPlugin.originalTrailTime;
@@ -65,7 +65,7 @@ namespace Rebound
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.DoTrick))]
         public static bool DoTrickPrefix_FailIfNotRebound(Player.TrickType type, string trickName, int trickNum, Player __instance) {
-            if (!__instance == ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
+            if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
 
             // if can rebound and choosing not to, drop combo
             if (ReboundPlugin.CanRebound() && !(trickName.Contains("Rebound") && trickNum == 0 && type == Player.TrickType.AIR)) {
@@ -79,7 +79,7 @@ namespace Rebound
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.LandCombo))]
         public static bool LandComboPrefix_ExtendForRebound(Player __instance) {
-            if (!__instance == ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
+            if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
 
             // don't land combo if the player can still rebound
             return (!(ReboundPlugin.CanRebound() && !__instance.slideAbility.stopDecided));
@@ -88,7 +88,7 @@ namespace Rebound
         [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.ActivateAbility))]
         public static bool AbilityPrefix_CancelRebound(Ability a, Player __instance) {
-            if (!__instance == ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
+            if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
             ReboundPlugin.rebounding = false;
 
             //__instance.boostpackTrailDefaultTime = ReboundPlugin.originalTrailTime;
