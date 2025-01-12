@@ -1,3 +1,6 @@
+## 2.0.1
+* Fixed a regression that broke using slide as a Rebound Modifier Action
+
 ## 2.0.0 (New Year Update)
 * New configuration option: Prevent Combo Extension (enabled by default)
     * Prevents using a long grace period to artificially extend combos

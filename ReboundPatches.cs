@@ -64,7 +64,7 @@ namespace Rebound
 
             // if can rebound and choosing not to, drop combo
             if (ReboundPlugin.CanRebound() && !(trickName.Contains("Rebound") && trickNum == 0 && type == Player.TrickType.AIR)) {
-                if (ReboundPlugin.landTime > Reptile.Core.dt && !(__instance.currentTrickType == Player.TrickType.SLIDE && type == Player.TrickType.SLIDE)) {
+                if (ReboundPlugin.landTime > Reptile.Core.dt*3f && !(__instance.currentTrickType == Player.TrickType.SLIDE && type == Player.TrickType.SLIDE)) {
                     ReboundPlugin.CancelRebound();
                 }
             }

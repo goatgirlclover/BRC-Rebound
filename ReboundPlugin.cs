@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Rebound
 {   
-    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.0.0")]
+    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.0.1")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     [BepInDependency("com.yuril.MovementPlus", BepInDependency.DependencyFlags.SoftDependency)]
     public class ReboundPlugin : BaseUnityPlugin
@@ -95,7 +95,7 @@ namespace Rebound
                 player.LandCombo();
             }
 
-            if (player.ability == player.slideAbility) { landTime = float.PositiveInfinity; }
+            //if (player.ability == player.slideAbility) { landTime = float.PositiveInfinity; }
 
             if (player.boostpackTrailDefaultTime == reboundTrailTime && (player.boostTrailTimer == 0f)) {
                 player.boostpackTrailDefaultTime = originalTrailTime;
