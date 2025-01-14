@@ -68,11 +68,11 @@ namespace Rebound
         public static void OnLandedPostfix_ReboundSlide(Player __instance) {
             if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return; }
 
-            ReboundPlugin.Log.LogInfo("Landed: " + __instance.slideButtonHeld + !__instance.slideAbility.locked + !__instance.jumpRequested + wasRequestingJump + (wasRequestingJumpTime <= __instance.JumpPreGroundingGraceTime));
+            //ReboundPlugin.Log.LogInfo("Landed: " + __instance.slideButtonHeld + !__instance.slideAbility.locked + !__instance.jumpRequested + wasRequestingJump + (wasRequestingJumpTime <= __instance.JumpPreGroundingGraceTime));
             if (__instance.slideButtonHeld && !__instance.slideAbility.locked && !__instance.jumpRequested 
             && ((wasRequestingJump && wasRequestingJumpTime <= __instance.JumpPreGroundingGraceTime) || __instance.jumpButtonNew)
             && ReboundPlugin.PlayerAttemptingRebound()) { //&& ReboundPlugin.doReboundActions.Contains("slideButtonHeld")
-                ReboundPlugin.Log.LogInfo("Buffered slide rebound");
+                //ReboundPlugin.Log.LogInfo("Buffered slide rebound");
                 __instance.jumpRequested = true;
                 __instance.timeSinceJumpRequested = wasRequestingJumpTime;
                 ReboundPlugin.ReboundTrick(); 
