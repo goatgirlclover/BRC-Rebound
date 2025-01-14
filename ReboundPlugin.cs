@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Rebound
 {   
-    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.1.1")]
+    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.2.0")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     [BepInDependency("com.yuril.MovementPlus", BepInDependency.DependencyFlags.SoftDependency)]
     public class ReboundPlugin : BaseUnityPlugin
@@ -102,14 +102,24 @@ namespace Rebound
             } else if (player.boostpackTrailDefaultWidth == reboundTrailWidth) {*/
 
             if (rebounding && player.boostTrailTimer <= 0f) { rebounding = false; }
-            else if (rebounding) {
+            else if (rebounding && RBSettings.config_enableTrail.Value) {
                 player.boostTrailTimer += Mathf.Min(Core.dt, player.GetVelocity().y/500f)*6f; 
                 player.trailWidth += Mathf.Min(Core.dt, player.GetVelocity().y/500f); 
             }
         }
 
         public static bool CanRebound() {
-            return ReboundPlugin.landTime < maxLandingTimeToRebound && player.IsGrounded();
+            return ReboundPlugin.landTime < maxLandingTimeToRebound && 
+                (player.IsGrounded() || player.timeSinceLastAbleToJump <= player.JumpPostGroundingGraceTime);
+        }
+
+        public static bool PlayerAttemptingRebound() {
+            bool doingRBActions = ReboundPlugin.doReboundActions.Any() ? ReboundPlugin.ActionsPressed(ReboundPlugin.doReboundActions, RBSettings.config_requireAllDRA.Value) : true;
+            bool cancelRBActions = ReboundPlugin.cancelReboundActions.Any() ? ReboundPlugin.ActionsPressed(ReboundPlugin.cancelReboundActions, RBSettings.config_requireAllCRA.Value) : false; 
+            
+            return ReboundPlugin.landingVelocity.y < -ReboundPlugin.minVelocityToRebound 
+                && ReboundPlugin.landTime < ReboundPlugin.maxLandingTimeToRebound
+                && !cancelRBActions && doingRBActions;
         }
 
         public static void ReboundTrick() {
@@ -122,6 +132,7 @@ namespace Rebound
             
             PrepForRebound(); // Set up variables, play SFX/voice, particle effects, etc.
             if (refreshCombo) { player.comboTimeOutTimer = landingComboMeter; }
+            rebounding = true;
 
             // Calc initial rebound velocity
             Vector2 reboundVelocity = landingVelocity;
@@ -208,8 +219,9 @@ namespace Rebound
             if (RBSettings.config_enableTrail.Value) {
                 player.boostTrailTimer = reboundTrailTime;
                 player.trailWidth = reboundTrailWidth;
-                rebounding = true;
             }
+
+            rebounding = true;
         }
 
         public static void PrepForRebound() {
@@ -238,7 +250,7 @@ namespace Rebound
         }
 
         public static void CancelRebound() {
-            if (!ComboCanBeCancelled() || !RBSettings.config_preventComboExtend.Value) { return; }
+            if (!ComboCanBeCancelled() || !RBSettings.config_preventComboExtend.Value || rebounding) { return; }
             ReboundPlugin.landTime = ReboundPlugin.maxLandingTimeToRebound + 1f;
             player.LandCombo();
         }
@@ -264,15 +276,15 @@ namespace Rebound
         public static bool TranslateActionString(string action) {
             switch(action) {
                 case "jumpRequested": return player.jumpRequested;
-                case "trick1ButtonHeld": return player.trick1ButtonHeld;
-                case "trick2ButtonHeld": return player.trick2ButtonHeld;
-                case "trick3ButtonHeld": return player.trick3ButtonHeld;
-                case "slideButtonHeld": return player.slideButtonHeld;
-                case "boostButtonHeld": return player.boostButtonHeld;
-                case "sprayButtonHeld": return player.sprayButtonHeld;
-                case "danceButtonHeld": return player.danceButtonHeld;
-                case "switchStyleButtonHeld": return player.switchStyleButtonHeld;
-                case "walkButtonHeld": return player.walkButtonHeld;
+                case "trick1ButtonHeld": return player.trick1ButtonHeld || player.trick1ButtonNew;
+                case "trick2ButtonHeld": return player.trick2ButtonHeld || player.trick2ButtonNew;
+                case "trick3ButtonHeld": return player.trick3ButtonHeld || player.trick3ButtonNew;
+                case "slideButtonHeld": return player.slideButtonHeld || player.slideButtonNew || player.ability == player.slideAbility;
+                case "boostButtonHeld": return player.boostButtonHeld || player.boostButtonNew;
+                case "sprayButtonHeld": return player.sprayButtonHeld || player.sprayButtonNew;
+                case "danceButtonHeld": return player.danceButtonHeld || player.danceButtonNew;
+                case "switchStyleButtonHeld": return player.switchStyleButtonHeld || player.switchStyleButtonNew;
+                case "walkButtonHeld": return player.walkButtonHeld || player.walkButtonNew;
                 default: return false;
             }
         }
