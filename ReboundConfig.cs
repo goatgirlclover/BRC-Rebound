@@ -13,7 +13,7 @@ using System.Reflection;
 namespace Rebound
 {   
     internal class RBSettings {
-        public static List<string> PlayerActionTypes = new List<string> { // <name>buttonHeld
+        public static List<string> PlayerActionTypes = new List<string> { 
             //"jump", // special handler - use jumpRequested instead
             "slide",
             "boost",
@@ -48,12 +48,12 @@ namespace Rebound
         //private static ConfigEntry<bool> config_allowBoostedRebounds; // removed in New Years Update
         private static ConfigEntry<bool> config_tempDisableBoostAfterRebound;
         private static ConfigEntry<bool> config_alwaysCalculateBasedOnHeight;
-        //private static ConfigEntry<bool> config_allowReduceComboOnGround; 
+        //private static ConfigEntry<bool> config_allowReduceComboOnGround; // never implemented properly
 
         public static ConfigEntry<bool> config_slopeOnLauncher;
 
+        // Options (New Years)
         public static ConfigEntry<bool> config_preventComboExtend;
-
         public static ConfigEntry<bool> config_enableTrail;
         public static ConfigEntry<float> config_trailLength;
         public static ConfigEntry<float> config_trailWidth;
@@ -93,12 +93,10 @@ namespace Rebound
             ReboundPlugin.doReboundActions = ConvertString(config_doReboundActions.Value, PlayerActionTypes);
         }
 
-        public static void UpdateSettingsEvent(object sender, EventArgs args) {
-            SetSettingsInPlugin();
-        }
+        // make this unnecessary next update
+        public static void UpdateSettingsEvent(object sender, EventArgs args) { SetSettingsInPlugin(); }
 
         public static List<string> ConvertString(string _string, List<string> _list) {
-            //_string = _string.ToLower();
             string stringNoSpaces = _string.Replace(" ", "").ToLower();
             List<string> keyList = stringNoSpaces.Split(',').ToList();
             List<string> newList = new List<string>();
@@ -120,7 +118,6 @@ namespace Rebound
                 }
             }
             return newList;
-
         }
 
         private static void BindSettings(ConfigFile Config) {

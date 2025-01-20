@@ -6,6 +6,7 @@ A Hover-inspired plugin for Bomb Rush Cyberfunk that adds the Rebound, a timing-
     * Cancellable by holding the slide button (or whatever input settings you prefer)
 * **Boosted Rebound**: Hold boost while performing a Rebound to automatically perform a Boost Trick, refiling your meter and launching you forwards!
 * **Plenty of configuration options** to allow you to tune the move exactly how you'd like it
+* **(New!) Custom Rebound animations** for each movestyle
 
 ## MovementPlus 3.0 Compatibility
 By default, Rebounding only requires pressing the jump button shortly after landing. To avoid overlapping with MovementPlus 3.0's **Wave Dash**, either:

@@ -1,3 +1,12 @@
+## 2.3.0 
+* **Added custom Rebound animations**
+    * Rebound animations for each movestyle and each trick button can now be configured in a new "goatgirl.Rebound.NewTrix.cfg" configuration file
+    * Animation names follow the same rules as the NewTrix updates
+        * **BunchOfEmotes animations are supported** using the Z-code system NewTrix follows
+    * New Rebound.NewTrix configuration option: Multiple Tricks for Boosted Rebounds (enabled by default)
+        * Holding a trick button while doing a Boosted Rebound will perform the boost trick associated with that button
+* Reverted a change that made Rebounds too sensitive (could be triggered when jumping off rails or billboards)
+
 ## 2.2.0 
 * Rebounding while holding slide is now much more consistent and easier to pull off
     * Adjusted timing to match non-sliding Rebounds

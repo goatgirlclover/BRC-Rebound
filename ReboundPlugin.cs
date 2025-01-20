@@ -9,10 +9,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.IO;
 
 namespace Rebound
 {   
-    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.2.0")]
+    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.3.0")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     [BepInDependency("com.yuril.MovementPlus", BepInDependency.DependencyFlags.SoftDependency)]
     public class ReboundPlugin : BaseUnityPlugin
@@ -55,6 +56,7 @@ namespace Rebound
         public static float reboundTrailTime { get { return RBSettings.config_trailLength.Value + 0.000125f; } }
         public static float reboundTrailWidth { get { return RBSettings.config_trailWidth.Value + 0.000125f; } }
         public static bool rebounding = false;
+        public static bool settingUpRebound = false;
 
         private void Awake()
         {
@@ -109,8 +111,7 @@ namespace Rebound
         }
 
         public static bool CanRebound() {
-            return ReboundPlugin.landTime < maxLandingTimeToRebound && 
-                (player.IsGrounded() || player.timeSinceLastAbleToJump <= player.JumpPostGroundingGraceTime);
+            return ReboundPlugin.landTime < maxLandingTimeToRebound && player.IsGrounded();
         }
 
         public static bool PlayerAttemptingRebound() {
@@ -126,13 +127,14 @@ namespace Rebound
             bool isBoosting = allowBoostedRebounds ? player.boosting : false;
             float floorAngle = Vector3.Dot(Vector3.ProjectOnPlane(player.motor.groundNormalVisual, Vector3.up).normalized, player.dir);
             
-            // Force rebound animations to properly transition to jump/fall animations
+            // Force (default) Rebound animations to properly transition to jump/fall animations
             player.animInfosSets[(int)player.moveStyle][Animator.StringToHash("jumpTrick1")].fadeTo[player.fallHash] = 1f;
             player.animInfosSets[(int)player.moveStyle][Animator.StringToHash("jumpTrick1")].fadeTo[Animator.StringToHash("fallIdle")] = 1f;
             
             PrepForRebound(); // Set up variables, play SFX/voice, particle effects, etc.
             if (refreshCombo) { player.comboTimeOutTimer = landingComboMeter; }
             rebounding = true;
+            settingUpRebound = true;
 
             // Calc initial rebound velocity
             Vector2 reboundVelocity = landingVelocity;
@@ -147,12 +149,10 @@ namespace Rebound
                 if (tempDisableBoostAfterRebound) {
                     player.ActivateAbility(player.airTrickAbility);
                     player.airTrickAbility.duration /= 3f;
-                    player.PlayAnim(Animator.StringToHash("jumpTrick1"), true, true, -1f);
                 }
-                
-                string normalTrickName = player.moveStyle == MoveStyle.BMX ? "360 Backflip" : 
-                    (player.moveStyle == MoveStyle.SKATEBOARD ? "McTwist" : "Corkscrew");
-                player.DoTrick(Player.TrickType.AIR, "Rebound " + normalTrickName, 0); 
+
+                player.DoTrick(Player.TrickType.AIR, RBTrix.GetReboundTrickName(), 0); 
+                player.PlayAnim(Animator.StringToHash(RBTrix.GetReboundAnimation()), true, true, -1f);
             }
 
             // Counteract M+ fast fall exploitation - bounceCap should never be run into in vanilla
@@ -205,23 +205,13 @@ namespace Rebound
             if (player.comboTimeOutTimer == 0f) { player.LandCombo(); }
             //if (boostCost != 0f) { player.AddBoostCharge(-boostCost); }
 
-            // Extend trail effect
-            /*if (player.boostpackTrailDefaultTime < reboundTrailTime) {
-                originalTrailTime = player.boostpackTrailDefaultTime; 
-                originalTrailWidth = player.boostpackTrailDefaultWidth;
-                player.boostpackTrailDefaultTime = reboundTrailTime;
-                player.boostpackTrailDefaultWidth = reboundTrailWidth;
-            } 
-            
-            player.boostTrailTimer = player.boostpackTrailDefaultTime;
-            player.trailWidth = player.boostpackTrailDefaultWidth;  */
-
             if (RBSettings.config_enableTrail.Value) {
                 player.boostTrailTimer = reboundTrailTime;
                 player.trailWidth = reboundTrailWidth;
             }
 
             rebounding = true;
+            settingUpRebound = false;
         }
 
         public static void PrepForRebound() {
@@ -242,7 +232,7 @@ namespace Rebound
             player.AudioManager.PlaySfxGameplay(SfxCollectionID.GenericMovementSfx, AudioClipID.jump_special, 
                 player.playerOneShotAudioSource, 0f);
             player.PlayVoice(AudioClipID.VoiceJump, VoicePriority.MOVEMENT, true);
-            if (!isBoosting) { player.PlayAnim(Animator.StringToHash("jumpTrick1"), true, false, -1f); }
+            if (!isBoosting) { player.PlayAnim(Animator.StringToHash(RBTrix.GetReboundAnimation()), true, false, -1f); }
             else { player.PlayAnim(Animator.StringToHash("jump"), true, false, -1f); }
 
             player.DoHighJumpEffects(player.motor.groundNormalVisual * -1f);

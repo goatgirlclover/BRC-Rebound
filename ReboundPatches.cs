@@ -12,6 +12,22 @@ using System.Reflection;
 
 namespace Rebound
 {
+    [HarmonyPatch(typeof(AirTrickAbility))]
+    internal class AirTrickPatch {
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(AirTrickAbility.SetupBoostTrick))]
+        private static bool SetupBoostTrick_Prefix(AirTrickAbility __instance) { 
+            if (ReboundPlugin.rebounding && ReboundPlugin.allowBoostedRebounds && RBTrix.boostedReboundsRespectTrickButtons.Value) {
+                int trickNum = (int)RBTrix.GetPlayerTrickNumber(ReboundPlugin.player);
+                if (trickNum < 0) { trickNum = 0; }
+                __instance.curTrick = trickNum;
+            }
+            ReboundPlugin.Log.LogInfo(__instance.curTrick);
+            ReboundPlugin.Log.LogInfo(ReboundPlugin.rebounding.ToString() + ReboundPlugin.allowBoostedRebounds.ToString() + RBTrix.boostedReboundsRespectTrickButtons.Value.ToString());
+            return true;
+        }    
+    }
+
     [HarmonyPatch(typeof(Player))]
     internal class PlayerPatches
     {
@@ -26,11 +42,10 @@ namespace Rebound
             
             __instance.jumpedThisFrame = false;
             __instance.timeSinceJumpRequested += Reptile.Core.dt;
-            //ReboundPlugin.rebounding = false;
 
-            // simplified JumpIsAllowed check for rebound - bypasses any ability checks
-            if (__instance.jumpRequested && (!__instance.jumpConsumed || __instance.ability == __instance.slideAbility || __instance.ability == __instance.boostAbility) 
-            && (__instance.IsGrounded() || __instance.timeSinceLastAbleToJump <= __instance.JumpPostGroundingGraceTime)) {            
+            // simplified JumpIsAllowed check for Rebound - bypasses any ability checks
+            if (__instance.jumpRequested && __instance.IsGrounded()
+            && (!__instance.jumpConsumed || __instance.ability == __instance.slideAbility || __instance.ability == __instance.boostAbility)) {            
                 if (ReboundPlugin.PlayerAttemptingRebound()) { 
                     ReboundPlugin.ReboundTrick(); 
                 } else if (__instance.JumpIsAllowed()) { // kind of inefficient...
@@ -49,10 +64,7 @@ namespace Rebound
         public static bool OnLandedPrefix_ReboundDistance(Player __instance) {
             if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
             ReboundPlugin.rebounding = false;
-            
-            //__instance.boostpackTrailDefaultTime = ReboundPlugin.originalTrailTime;
-            //__instance.boostpackTrailDefaultWidth = ReboundPlugin.originalTrailWidth;
-            
+                        
             ReboundPlugin.landTime = 0f;
             ReboundPlugin.distanceFallenFromPeakOfJump += __instance.reallyMovedVelocity.y; 
             //ReboundPlugin.groundedPositionY = __instance.tf.position.y;
@@ -68,14 +80,13 @@ namespace Rebound
         public static void OnLandedPostfix_ReboundSlide(Player __instance) {
             if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return; }
 
-            //ReboundPlugin.Log.LogInfo("Landed: " + __instance.slideButtonHeld + !__instance.slideAbility.locked + !__instance.jumpRequested + wasRequestingJump + (wasRequestingJumpTime <= __instance.JumpPreGroundingGraceTime));
             if (__instance.slideButtonHeld && !__instance.slideAbility.locked && !__instance.jumpRequested 
             && ((wasRequestingJump && wasRequestingJumpTime <= __instance.JumpPreGroundingGraceTime) || __instance.jumpButtonNew)
             && ReboundPlugin.PlayerAttemptingRebound()) { //&& ReboundPlugin.doReboundActions.Contains("slideButtonHeld")
                 //ReboundPlugin.Log.LogInfo("Buffered slide rebound");
                 __instance.jumpRequested = true;
                 __instance.timeSinceJumpRequested = wasRequestingJumpTime;
-                ReboundPlugin.ReboundTrick(); 
+                //ReboundPlugin.ReboundTrick(); 
             }
         }
 
@@ -106,10 +117,7 @@ namespace Rebound
         [HarmonyPatch(nameof(Player.ActivateAbility))]
         public static bool AbilityPrefix_CancelRebound(Ability a, Player __instance) {
             if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
-            ReboundPlugin.rebounding = false;
-
-            //__instance.boostpackTrailDefaultTime = ReboundPlugin.originalTrailTime;
-            //__instance.boostpackTrailDefaultWidth = ReboundPlugin.originalTrailWidth;
+            if (!ReboundPlugin.settingUpRebound) { ReboundPlugin.rebounding = false; }
 
             if ((__instance.ability == null || __instance.ability == __instance.slideAbility) && a != __instance.boostAbility && 
             ReboundPlugin.CanRebound() && ReboundPlugin.landTime > Reptile.Core.dt*3f) {
