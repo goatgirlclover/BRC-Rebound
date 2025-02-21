@@ -170,6 +170,28 @@ namespace Rebound
 
             return false;
         }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(Player.PlayAnim))]
+        public static bool PlayAnimPrefix(int newAnim, bool forceOverwrite, bool instant, float atTime, Player __instance) {
+            if (!__instance.gameObject.activeSelf || (newAnim == __instance.curAnim && !forceOverwrite) 
+            || !ReboundPlugin.rebounding || RBTrix.forceAnimationBlending.Value <= 0f) { return true; }
+            
+			if (!instant && atTime == -1f && ReboundPlugin.rebounding && !__instance.animInfos.ContainsKey(__instance.curAnim)
+                //&& __instance.curAnim == Animator.StringToHash(RBTrix.GetReboundAnimation())
+                && RBTrix.GetAllReboundAnimations().Contains(__instance.curAnim)
+                && (newAnim == __instance.fallHash || newAnim == Animator.StringToHash("fallIdle")))
+			{
+				__instance.anim.CrossFade(newAnim, RBTrix.forceAnimationBlending.Value);
+                __instance.curAnimActiveTime = 0f;
+                __instance.firstFrameAnim = true;
+                __instance.characterVisual.feetIK = (__instance.animInfos.ContainsKey(newAnim) && __instance.animInfos[newAnim].feetIK);
+                __instance.curAnim = newAnim;
+                return false; 
+			}
+            
+            return true;
+        }
     }
 
 }

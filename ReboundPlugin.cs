@@ -13,7 +13,7 @@ using System.IO;
 
 namespace Rebound
 {   
-    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.3.0")]
+    [BepInPlugin("goatgirl.Rebound", "Rebound", "2.3.1")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     [BepInDependency("com.yuril.MovementPlus", BepInDependency.DependencyFlags.SoftDependency)]
     public class ReboundPlugin : BaseUnityPlugin
@@ -152,7 +152,7 @@ namespace Rebound
                 }
 
                 player.DoTrick(Player.TrickType.AIR, RBTrix.GetReboundTrickName(), 0); 
-                player.PlayAnim(Animator.StringToHash(RBTrix.GetReboundAnimation()), true, true, -1f);
+                player.PlayAnim(RBTrix.StringToHash(RBTrix.GetReboundAnimation()), true, true, -1f);
             }
 
             // Counteract M+ fast fall exploitation - bounceCap should never be run into in vanilla
@@ -232,7 +232,7 @@ namespace Rebound
             player.AudioManager.PlaySfxGameplay(SfxCollectionID.GenericMovementSfx, AudioClipID.jump_special, 
                 player.playerOneShotAudioSource, 0f);
             player.PlayVoice(AudioClipID.VoiceJump, VoicePriority.MOVEMENT, true);
-            if (!isBoosting) { player.PlayAnim(Animator.StringToHash(RBTrix.GetReboundAnimation()), true, false, -1f); }
+            if (!isBoosting) { player.PlayAnim(RBTrix.StringToHash(RBTrix.GetReboundAnimation()), true, false, -1f); }
             else { player.PlayAnim(Animator.StringToHash("jump"), true, false, -1f); }
 
             player.DoHighJumpEffects(player.motor.groundNormalVisual * -1f);

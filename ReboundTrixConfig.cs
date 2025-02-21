@@ -15,12 +15,24 @@ namespace Rebound
     [BepInPlugin("goatgirl.Rebound.NewTrix", "Rebound.NewTrix", "1.0.0")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     public class ReboundTrixPlugin : BaseUnityPlugin {
-        private void Awake() { RBTrix.UpdateSettings(Config); }
+        private void Awake() { 
+            RBTrix.UpdateSettings(Config); 
+
+            // Check for NewTrix + BOE 
+            bool hasTrix = false;
+            bool hasBOE = false;
+            foreach (var plugin in BepInEx.Bootstrap.Chainloader.PluginInfos)
+            {
+                if (plugin.Value.Metadata.GUID.Equals("ConfigTrixAirTricks")) { hasTrix = true; }
+                else if (plugin.Value.Metadata.GUID.Equals("com.Dragsun.BunchOfEmotes")) { hasBOE = true; }
+            }
+            RBTrix.TrixBOEActive = hasTrix && hasBOE;
+        }
     }
 
     internal class RBTrix {
         public static ConfigEntry<bool> boostedReboundsRespectTrickButtons;
-        //public static ConfigEntry<bool> forceAnimationBlending;
+        public static ConfigEntry<float> forceAnimationBlending;
         
         public static ConfigEntry<string> reboundTrickAnimFootDefault;
         public static ConfigEntry<string> reboundTrickNameFootDefault;
@@ -62,11 +74,14 @@ namespace Rebound
         public static ConfigEntry<string> reboundTrickAnimBMXDefaultBoost;
         public static ConfigEntry<string> reboundTrickAnimInlineDefaultBoost;
         public static ConfigEntry<string> reboundTrickAnimBoardDefaultBoost; */
+
+        public static bool TrixBOEActive = false;
         
         public static void UpdateSettings(ConfigFile Config) { BindSettings(Config); }
 
         private static void BindSettings(ConfigFile Config) {
             boostedReboundsRespectTrickButtons = Config.Bind("1. Options", "Multiple Tricks for Boosted Rebounds", true, "If enabled, holding a trick button while doing a Boosted Rebound will perform the boost trick associated with that button.");
+            forceAnimationBlending = Config.Bind("1. Options", "Force Smooth Animation Blending", 0f, "The speed at which the Rebound animation blends into the fall animation (bigger is slower). If set to 0 or below, many custom Rebound animations will not smoothly transition into the fall animation.");
 
             reboundTrickAnimFootDefault = Config.Bind("2. On-Foot Rebound Tricks", "On-Foot Trick (Default)", "jumpTrick1", "Default Rebound trick, holding no trick button");
             reboundTrickNameFootDefault = Config.Bind("2. On-Foot Rebound Tricks", "On-Foot Trick (Default) Name", "Rebound Corkscrew", "Default Rebound trick name, holding no trick button");
@@ -151,6 +166,16 @@ namespace Rebound
             return GetReboundAnimation(p.moveStyle, GetPlayerTrickNumber(p)); 
         }
 
+        public static List<int> GetAllReboundAnimations() {
+            Player p = ReboundPlugin.player;
+            return new List<int> { 
+                RBTrix.StringToHash(GetReboundAnimation(p.moveStyle, -1)),
+                RBTrix.StringToHash(GetReboundAnimation(p.moveStyle, 0)),
+                RBTrix.StringToHash(GetReboundAnimation(p.moveStyle, 1)),
+                RBTrix.StringToHash(GetReboundAnimation(p.moveStyle, 2)),
+                };
+        }
+
         public static string GetReboundTrickName() {
             Player p = ReboundPlugin.player;
             return GetReboundTrickName(p.moveStyle, GetPlayerTrickNumber(p)); 
@@ -161,6 +186,11 @@ namespace Rebound
 			if (p.trick2ButtonNew || p.trick2ButtonHeld) { return 1; }
 			if (p.trick3ButtonNew || p.trick3ButtonHeld) { return 2; }
 			return -1;
+        }
+
+        public static int StringToHash(string name) {
+            if (TrixBOEActive) { return Rebound.RBTrixHelper.StringToHash(name); }
+            else { return Animator.StringToHash(name); }
         }
     }
 }
