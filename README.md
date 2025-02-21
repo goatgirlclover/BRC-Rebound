@@ -15,5 +15,6 @@ A Hover-inspired plugin for Bomb Rush Cyberfunk that adds the Rebound, a timing-
 This plugin requires the following .dlls to be placed in the \lib\ folder:
 * A [publicized](https://github.com/BepInEx/BepInEx.AssemblyPublicizer) version of the game's code (Assembly-CSharp.dll)
 * 0Harmony.dll and BepInEx.dll from \BepInEx\core
+* [NewTrix.dll](https://thunderstore.io/c/bomb-rush-cyberfunk/p/Woodztock/NewTrix) (for NewTrix + BunchOfEmotes compatibility)
 
 With these files, run "dotnet build" in the project's root folder and the .dll will be placed in the \bin\ folder.
