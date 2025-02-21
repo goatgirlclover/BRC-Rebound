@@ -14,6 +14,8 @@ namespace Rebound
 {   
     [BepInPlugin("goatgirl.Rebound.NewTrix", "Rebound.NewTrix", "1.0.0")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
+    [BepInDependency("ConfigTrixAirTricks", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("com.Dragsun.BunchOfEmotes", BepInDependency.DependencyFlags.SoftDependency)]
     public class ReboundTrixPlugin : BaseUnityPlugin {
         private void Awake() { 
             RBTrix.UpdateSettings(Config); 
@@ -27,6 +29,7 @@ namespace Rebound
                 else if (plugin.Value.Metadata.GUID.Equals("com.Dragsun.BunchOfEmotes")) { hasBOE = true; }
             }
             RBTrix.TrixBOEActive = hasTrix && hasBOE;
+            if (RBTrix.TrixBOEActive) { Logger.LogInfo("NewTrix + BOE active!"); }
         }
     }
 

@@ -1,8 +1,17 @@
+## 2.3.1
+* New Rebound.NewTrix configuration option: Force Animation Blending
+    * The speed at which custom Rebound animations blend into the fall animation (larger numbers are slower transitions)
+        * Allows custom Rebound animations to blend smoothly
+        * May cause jank - many BOE animations weren't built to blend like this!
+    * Set to 0 by default (no effect) due to aformentioned jank - 0.75 recommended if you can deal with it
+* BunchOfEmotes animations can be configured by name - **z-codes are no longer needed**
+    * Calls NewTrix methods directly; naturally, requires both NewTrix and BunchOfEmotes to be installed
+
 ## 2.3.0 
 * **Added custom Rebound animations**
     * Rebound animations for each movestyle and each trick button can now be configured in a new "goatgirl.Rebound.NewTrix.cfg" configuration file
     * Animation names follow the same rules as the NewTrix updates
-        * **BunchOfEmotes animations are supported** using the Z-code system NewTrix follows
+        * **BunchOfEmotes animations are supported** 
     * New Rebound.NewTrix configuration option: Multiple Tricks for Boosted Rebounds (enabled by default)
         * Holding a trick button while doing a Boosted Rebound will perform the boost trick associated with that button
 * Reverted a change that made Rebounds too sensitive (could be triggered when jumping off rails or billboards)

@@ -16,6 +16,8 @@ namespace Rebound
     [BepInPlugin("goatgirl.Rebound", "Rebound", "2.3.1")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     [BepInDependency("com.yuril.MovementPlus", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("ConfigTrixAirTricks", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("com.Dragsun.BunchOfEmotes", BepInDependency.DependencyFlags.SoftDependency)]
     public class ReboundPlugin : BaseUnityPlugin
     {
         internal static ManualLogSource Log;

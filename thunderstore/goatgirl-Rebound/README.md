@@ -6,7 +6,7 @@ A Hover-inspired plugin for Bomb Rush Cyberfunk that adds the Rebound, a timing-
     * Cancellable by holding the slide button (or whatever input settings you prefer)
 * **Boosted Rebound**: Hold boost while performing a Rebound to automatically perform a Boost Trick, refiling your meter and launching you forwards!
 * **Plenty of configuration options** to allow you to tune the move exactly how you'd like it
-* **(New!) Custom Rebound animations** for each movestyle
+* **(New!) Custom Rebound animations**, configurable for each movestyle
 
 ## MovementPlus 3.0 Compatibility
 By default, Rebounding only requires pressing the jump button shortly after landing. To avoid overlapping with MovementPlus 3.0's **Wave Dash**, either:
@@ -23,3 +23,8 @@ By default, Rebounding only requires pressing the jump button shortly after land
 ## Installation
 * If installing using r2modman, just click "Install with Mod Manager"
 * If installing manually, extract the .zip and drop the Rebound.dll file into your \BepInEx\plugins\ folder 
+
+## Credits
+Thanks to:
+- Woodztock and Lazy Duchess for their work on NewTrix, which I referenced to support custom animations
+- Fay for helping me test versions 2.0 and onward :3
