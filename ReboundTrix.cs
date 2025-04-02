@@ -36,6 +36,11 @@ namespace Rebound
     internal class RBTrix {
         public static ConfigEntry<bool> boostedReboundsRespectTrickButtons;
         public static ConfigEntry<float> forceAnimationBlending;
+
+        public static ConfigEntry<bool> directionalTricks;
+        public static ConfigEntry<float> directionalTrickDeadzone;
+        public static ConfigEntry<string> inputsForNewTrix; 
+        public static List<string> newTrixActions;
         
         public static ConfigEntry<string> reboundTrickAnimFootDefault;
         public static ConfigEntry<string> reboundTrickNameFootDefault;
@@ -81,10 +86,17 @@ namespace Rebound
         public static bool TrixBOEActive = false;
         
         public static void UpdateSettings(ConfigFile Config) { BindSettings(Config); }
+        public static void UpdateSettingsEvent(object sender, EventArgs args) { newTrixActions = RBSettings.ConvertString(inputsForNewTrix.Value, RBSettings.PlayerActionTypes); }
 
         private static void BindSettings(ConfigFile Config) {
             boostedReboundsRespectTrickButtons = Config.Bind("1. Options", "Multiple Tricks for Boosted Rebounds", true, "If enabled, holding a trick button while doing a Boosted Rebound will perform the boost trick associated with that button.");
             forceAnimationBlending = Config.Bind("1. Options", "Force Smooth Animation Blending", 0f, "The speed at which the Rebound animation blends into the fall animation (bigger is slower). If set to 0 or below, many custom Rebound animations will not smoothly transition into the fall animation.");
+
+            directionalTricks = Config.Bind("1. Options", "Directional Tricks", false, "If enabled, holding a specific direction with the left stick can activate custom Rebound animations the same way trick buttons do. Left maps to Trick 0, Up maps to Trick 1, and Right maps to Trick 2. Holding down or no direction maps to the default.");
+            directionalTrickDeadzone = Config.Bind("1. Options", "Directional Tricks Deadzone", 0.8f, "How far you have to hold the stick a certain direction to activate a directional trick. The higher the number, the farther you must push the left stick. No effect if Directional Tricks are disabled.");
+            inputsForNewTrix = Config.Bind("1. Options", "Required Inputs for Custom Animations", "", "A list of ALL the additional player actions that need to be held to activate a custom Rebound animation (in addition to trick buttons, or directions if Directional Tricks is enabled), separated by commas. Can be blank to only require buttons/directions. Without pressing these buttons, the default animation will play. Note that jumping is always required. Acceptable values: slide, boost, spray, dance, trick1, trick2, trick3, trickAny, switchStyle, walk");
+            inputsForNewTrix.SettingChanged += UpdateSettingsEvent;
+            newTrixActions = RBSettings.ConvertString(inputsForNewTrix.Value, RBSettings.PlayerActionTypes);
 
             reboundTrickAnimFootDefault = Config.Bind("2. On-Foot Rebound Tricks", "On-Foot Trick (Default)", "jumpTrick1", "Default Rebound trick, holding no trick button");
             reboundTrickNameFootDefault = Config.Bind("2. On-Foot Rebound Tricks", "On-Foot Trick (Default) Name", "Rebound Corkscrew", "Default Rebound trick name, holding no trick button");
@@ -185,6 +197,21 @@ namespace Rebound
         }
 
         public static int GetPlayerTrickNumber(Player p) {
+            if (directionalTricks.Value) {
+                Vector2 playerInputVector = new Vector2(Core.Instance.GameInput.GetAxis(5, 0), Core.Instance.GameInput.GetAxis(6, 0)); 
+                if (playerInputVector.sqrMagnitude >= (directionalTrickDeadzone.Value * directionalTrickDeadzone.Value)) {
+                    float similarityToForward = Vector2.Dot(playerInputVector, Vector2.up);
+                    float similarityToDown = -similarityToForward; 
+                    float sideSim = playerInputVector.x < 0 ? Vector2.Dot(playerInputVector, Vector2.left) : Vector2.Dot(playerInputVector, Vector2.right);  
+
+                    float maximumSimilarity = Mathf.Max(similarityToForward, similarityToDown, sideSim);
+                    if (maximumSimilarity == sideSim) { return (playerInputVector.x < 0 ? 0 : 2); }
+                    else if (maximumSimilarity == similarityToForward) { return 1; }
+                    else { return -1; }
+                }
+            }
+
+            if (newTrixActions?.Any() == true) { if (!ReboundPlugin.ActionsPressed(newTrixActions, true)) { return -1; } }
 			if (p.trick1ButtonNew || p.trick1ButtonHeld) { return 0; }
 			if (p.trick2ButtonNew || p.trick2ButtonHeld) { return 1; }
 			if (p.trick3ButtonNew || p.trick3ButtonHeld) { return 2; }
