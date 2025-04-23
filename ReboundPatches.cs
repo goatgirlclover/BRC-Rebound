@@ -67,7 +67,7 @@ namespace Rebound
             if (!RBQTHelper.AbilityIsQuickTurn(__instance)) { return true; }
 
             if (__instance.jumpButtonNew && __instance.IsGrounded()
-            && ReboundPlugin.PlayerAttemptingRebound() && ReboundPlugin.attemptingBoostedRebound) {         
+            && ReboundPlugin.PlayerAttemptingRebound()) { //&& ReboundPlugin.attemptingBoostedRebound) {         
                 __instance.jumpButtonNew = false;
                 ReboundPlugin.ReboundTrick();
             }

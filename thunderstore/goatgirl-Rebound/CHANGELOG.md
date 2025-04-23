@@ -1,3 +1,8 @@
+## 3.0.2
+* Burst Rebounds are now disablable by setting Burst Rebound Power to zero
+* All Rebounds (not just Boosted/Burst) can now interrupt Quick Turn
+* (3.0.1) Corrected plugin version number
+
 ## 3.0.0
 * Added **Burst Rebounds**: Hold back (relative to the player) and boost while Rebounding to do a Burst Rebound, converting your forward speed directly into height
     * Can also be activated during a Quick Turn (but must still fit within the grace period!)
