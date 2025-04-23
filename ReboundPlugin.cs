@@ -169,6 +169,8 @@ namespace Rebound
         public static void ReboundTrick() {
             bool doingBoostedRebound = attemptingBoostedRebound;
             bool doingBurstRebound = attemptingBurstRebound || (attemptingBoostedRebound && RBQTHelper.AbilityIsQuickTurn(player));
+            if (RBSettings.config_burstReboundPower.Value <= 0.001f) { doingBurstRebound = false; }
+
             float floorAngle = Vector3.Dot(Vector3.ProjectOnPlane(player.motor.groundNormalVisual, Vector3.up).normalized, player.dir);
             
             // Force (default) Rebound animations to properly transition to jump/fall animations
