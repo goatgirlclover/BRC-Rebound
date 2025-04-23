@@ -1,3 +1,23 @@
+## 3.0.0
+* Added **Burst Rebounds**: Hold back (relative to the player) and boost while Rebounding to do a Burst Rebound, converting your forward speed directly into height
+    * Can also be activated during a Quick Turn (but must still fit within the grace period!)
+    * New configuration options: 
+        * **Burst Rebound Power**: Adjust how much forward speed you lose; higher values preserve more forward speed, but reduce Burst Rebound height
+        * Sensitivity and deadzone settings
+* New configuration option: Practice Mode
+    * When enabled, your character will be colored pink when it is possible to Rebound
+* Boosted Rebounds now send you slightly higher and farther 
+* Slightly increased default Rebound grace period to 0.2 
+* New Rebound.NewTrix configuration options:
+    * **Directional Tricks**: If enabled, holding a specific direction with the left stick can activate custom Rebound animations, as an alternative to holding the trick buttons
+        * Left maps to Trick 0, Up maps to Trick 1, and Right maps to Trick 2
+        * Holding down or no direction maps to the default
+        * Also includes deadzone settings
+    * **Required Inputs for Custom Animations**: A list of ALL the additional player actions that need to be held to activate a custom Rebound animation (in addition to trick buttons, or directions if Directional Tricks is enabled)
+        * Blank by default - only trick buttons / directions are required
+        * Without pressing these buttons, the default animation will play
+
+
 ## 2.3.1
 * New Rebound.NewTrix configuration option: Force Animation Blending
     * The speed at which custom Rebound animations blend into the fall animation (larger numbers are slower transitions)

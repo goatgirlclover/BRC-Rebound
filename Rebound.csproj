@@ -25,5 +25,7 @@
   <Reference Include="0Harmony.dll"><HintPath>lib\0Harmony.dll</HintPath></Reference>
   <Reference Include="BepInEx.dll"><HintPath>lib\BepInEx.dll</HintPath></Reference>
   <Reference Include="NewTrix.dll"><HintPath>lib\NewTrix.dll</HintPath></Reference>
+  <Reference Include="QuickTurn.dll"><HintPath>lib\QuickTurn.dll</HintPath></Reference>
+  <Reference Include="CrewBoomMono.dll"><HintPath>lib\CrewBoomMono.dll</HintPath></Reference>
   </ItemGroup>
 </Project>

@@ -60,6 +60,21 @@ namespace Rebound
         }
 
         [HarmonyPrefix]
+        [HarmonyPatch(nameof(Player.FixedUpdateAbilities))]
+        public static bool Postfix_FuckOverQuickTurn(Player __instance) {
+            if (!ReboundPlugin.hasQuickTurn) { return true; }
+            if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
+            if (!RBQTHelper.AbilityIsQuickTurn(__instance)) { return true; }
+
+            if (__instance.jumpButtonNew && __instance.IsGrounded()
+            && ReboundPlugin.PlayerAttemptingRebound() && ReboundPlugin.attemptingBoostedRebound) {         
+                __instance.jumpButtonNew = false;
+                ReboundPlugin.ReboundTrick();
+            }
+            return true;
+        }
+
+        [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.OnLanded))]
         public static bool OnLandedPrefix_ReboundDistance(Player __instance) {
             if (__instance != ReboundPlugin.player || __instance.isDisabled || __instance.isAI) { return true; }
@@ -86,6 +101,7 @@ namespace Rebound
                 //ReboundPlugin.Log.LogInfo("Buffered slide rebound");
                 __instance.jumpRequested = true;
                 __instance.timeSinceJumpRequested = wasRequestingJumpTime;
+                ReboundPlugin.ReboundTrick();
                 //ReboundPlugin.ReboundTrick(); 
             }
         }

@@ -197,8 +197,10 @@ namespace Rebound
         }
 
         public static int GetPlayerTrickNumber(Player p) {
+            if (newTrixActions?.Any() == true) { if (!ReboundPlugin.ActionsPressed(newTrixActions, true)) { return -1; } }
+            
             if (directionalTricks.Value) {
-                Vector2 playerInputVector = new Vector2(Core.Instance.GameInput.GetAxis(5, 0), Core.Instance.GameInput.GetAxis(6, 0)); 
+                Vector2 playerInputVector = p.moveInputPlain; 
                 if (playerInputVector.sqrMagnitude >= (directionalTrickDeadzone.Value * directionalTrickDeadzone.Value)) {
                     float similarityToForward = Vector2.Dot(playerInputVector, Vector2.up);
                     float similarityToDown = -similarityToForward; 
@@ -211,7 +213,6 @@ namespace Rebound
                 }
             }
 
-            if (newTrixActions?.Any() == true) { if (!ReboundPlugin.ActionsPressed(newTrixActions, true)) { return -1; } }
 			if (p.trick1ButtonNew || p.trick1ButtonHeld) { return 0; }
 			if (p.trick2ButtonNew || p.trick2ButtonHeld) { return 1; }
 			if (p.trick3ButtonNew || p.trick3ButtonHeld) { return 2; }
