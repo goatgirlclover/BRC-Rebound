@@ -227,9 +227,9 @@ namespace Rebound
                 reboundVelocity *= 1.1f; 
                 if (doingBurstRebound) {
                     Vector2 oldReboundVelocity = reboundVelocity;
-                    reboundVelocity.y *= (1f - RBSettings.config_burstReboundPower.Value)*(1f + (RBSettings.config_burstReboundTransfer.Value));
+                    reboundVelocity.y *= (1f - RBSettings.config_burstReboundPower.Value)*(1f + (0.65f));
                     reboundVelocity.x = Mathf.Pow(reboundVelocity.x, RBSettings.config_burstReboundPower.Value); 
-                    reboundVelocity.y += (oldReboundVelocity.x - reboundVelocity.x)*RBSettings.config_burstReboundTransfer.Value;
+                    reboundVelocity.y += (oldReboundVelocity.x - reboundVelocity.x)*0.65f;
                     player.audioManager.PlaySfxGameplay(SfxCollectionID.GenericMovementSfx, AudioClipID.launcher_woosh,
                     player.playerOneShotAudioSource, 0f);
                 }
