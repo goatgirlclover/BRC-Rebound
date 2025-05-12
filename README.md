@@ -1,7 +1,6 @@
 <p align="center"> <img src="icon.png" alt="Rebound icon" width="200"/> </p> 
 <h1> <p align="center" > Rebound </p> </h1> 
-A Hover-inspired plugin for Bomb Rush Cyberfunk that adds the Rebound, a timing-based trick that offers new air mobility options. 
-Installation and more info can be found on [Thunderstore](https://thunderstore.io/c/bomb-rush-cyberfunk/p/goatgirl/Rebound/).
+A Hover-inspired plugin for Bomb Rush Cyberfunk that adds the Rebound, a timing-based trick that offers new air mobility options. Installation and more info can be found on [Thunderstore](https://thunderstore.io/c/bomb-rush-cyberfunk/p/goatgirl/Rebound/).
 ## Features
 * **Rebound**: Tap the jump button as soon as you land to launch right back into the air!
     * Cancellable by holding the slide button (or whatever input settings you prefer)
