@@ -13,7 +13,7 @@ using System.IO;
 
 namespace Rebound
 {   
-    [BepInPlugin("goatgirl.Rebound", "Rebound", "3.0.2")]
+    [BepInPlugin("goatgirl.Rebound", "Rebound", "3.1.0")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     [BepInDependency("com.yuril.MovementPlus", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("ConfigTrixAirTricks", BepInDependency.DependencyFlags.SoftDependency)]
@@ -168,8 +168,8 @@ namespace Rebound
 
         public static void ReboundTrick() {
             bool doingBoostedRebound = attemptingBoostedRebound;
-            bool doingBurstRebound = attemptingBurstRebound || (attemptingBoostedRebound && RBQTHelper.AbilityIsQuickTurn(player));
-            if (RBSettings.config_burstReboundPower.Value <= 0.001f) { doingBurstRebound = false; }
+            bool doingBurstRebound = attemptingBurstRebound || (attemptingBoostedRebound && DoingQuickTurn());
+            if (!RBSettings.config_enableBurstRebound.Value) { doingBurstRebound = false; }
 
             float floorAngle = Vector3.Dot(Vector3.ProjectOnPlane(player.motor.groundNormalVisual, Vector3.up).normalized, player.dir);
             
@@ -229,9 +229,9 @@ namespace Rebound
                 reboundVelocity *= 1.1f; 
                 if (doingBurstRebound) {
                     Vector2 oldReboundVelocity = reboundVelocity;
-                    reboundVelocity.y *= (1f - RBSettings.config_burstReboundPower.Value)*(1f + (0.65f));
+                    reboundVelocity.y *= (RBSettings.config_burstReboundPower.Value);
                     reboundVelocity.x = Mathf.Pow(reboundVelocity.x, RBSettings.config_burstReboundPower.Value); 
-                    reboundVelocity.y += (oldReboundVelocity.x - reboundVelocity.x)*0.65f;
+                    reboundVelocity.y += (oldReboundVelocity.x - reboundVelocity.x)*0.5f;
                     player.audioManager.PlaySfxGameplay(SfxCollectionID.GenericMovementSfx, AudioClipID.launcher_woosh,
                     player.playerOneShotAudioSource, 0f);
                 }
@@ -339,6 +339,11 @@ namespace Rebound
 
         public static bool InGame() {
             return player != null && !player.isDisabled && !Core.Instance.BaseModule.IsInGamePaused;
+        }
+
+        public static bool DoingQuickTurn() {
+            if (!hasQuickTurn) { return false; } 
+            else { return RBQTHelper.AbilityIsQuickTurn(player); }
         }
     }
 }

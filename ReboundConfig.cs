@@ -60,6 +60,7 @@ namespace Rebound
         public static ConfigEntry<float> config_trailLength;
         public static ConfigEntry<float> config_trailWidth;
 
+        public static ConfigEntry<bool> config_enableBurstRebound;
         public static ConfigEntry<float> config_burstReboundPower;
         //public static ConfigEntry<float> config_burstReboundTransfer;
 
@@ -227,11 +228,18 @@ namespace Rebound
                 true,    // The default value
                 "Toggle whether doing a Rebound stops you from boosting until the trick is done. Does not affect Boosted Rebounds."); // Description of the option 
 
+            config_enableBurstRebound = Config.Bind(
+                "2. Options",
+                "Enable Burst Rebounds",
+                true,
+                "Hold back (relative to the player) and boost while Rebounding to do a Burst Rebound, converting your forward speed directly into height."
+            );
+
             config_burstReboundPower = Config.Bind(
                 "2. Options", 
                 "Burst Rebound Power", 
                 0.65f,
-                "Hold back (relative to the player) and boost while Rebounding to do a Burst Rebound, converting your forward speed directly into height. Burst Rebound Power adjusts how much forward speed you lose; higher values preserve more forward speed, but reduce Burst Rebound height."
+                "Adjusts how much forward speed you lose when Burst Rebounding. Higher values preserve more forward speed, converting less of it into Burst Rebound height; however, more vertical momentum is preserved in its place. Recommended to keep between 0 and 1."
             );
 
             /*config_burstReboundTransfer = Config.Bind(

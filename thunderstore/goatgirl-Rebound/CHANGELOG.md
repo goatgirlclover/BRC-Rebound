@@ -1,5 +1,12 @@
+## 3.1.0
+* Improved Burst Rebound math - Burst Rebound Power options are more balanced
+* Burst Rebounds can now be disabled in their own configuration option, independent from Burst Rebound power
+
+## 3.0.3 
+* Fixed an issue where Boost Rebounding without QuickTurn installed would cause a crash
+
 ## 3.0.2
-* Burst Rebounds are now disablable by setting Burst Rebound Power to zero
+* (Outdated) Burst Rebounds are now disablable by setting Burst Rebound Power to zero
 * All Rebounds (not just Boosted/Burst) can now interrupt Quick Turn
 * (3.0.1) Corrected plugin version number
 
