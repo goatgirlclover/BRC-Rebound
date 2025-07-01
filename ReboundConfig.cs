@@ -291,7 +291,7 @@ namespace Rebound
             config_cancelReboundActions = Config.Bind(
                 "3. Input",          // The section under which the option is shown
                 "Cancel Rebound Modifier Actions",     // The key of the configuration option in the configuration file
-                "slide",    // The default value
+                "",    // The default value
                 "A list of what player actions can be pressed/held to prevent a Rebound and do a regular jump instead, separated by commas. Acceptable values: slide, boost, spray, dance, trick1, trick2, trick3, trickAny, switchStyle, walk"); // Description of the option 
         
             config_requireAllCRA = Config.Bind(
@@ -300,7 +300,7 @@ namespace Rebound
                 false,    // The default value
                 "If true, the player must press/hold ALL the cancel modifier actions to cancel a Rebound. If false, the player can hold ANY of them to cancel a Rebound."); // Description of the option 
 
-            config_burstReboundSens = Config.Bind("3. Input", "Burst Rebound Sensitivity", 0.6f, "How precice you have to hold the left stick backwards (relative to the player) to activate a Burst Rebound. Higher values are more precise.");
+            config_burstReboundSens = Config.Bind("3. Input", "Burst Rebound Sensitivity", 0.75f, "How precice you have to hold the left stick backwards (relative to the player) to activate a Burst Rebound. Higher values are more precise.");
             config_burstReboundDead = Config.Bind("3. Input", "Burst Rebound Deadzone", 0.8f, "How far back you have to hold the left stick to activate a Burst Rebound. 1.0 is completely backwards, while 0.0 is not holding the stick at all.");
             config_burstReboundDeadSquared = config_burstReboundDead.Value*config_burstReboundDead.Value;
             
