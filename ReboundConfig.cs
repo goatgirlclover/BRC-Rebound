@@ -68,6 +68,8 @@ namespace Rebound
         private static ConfigEntry<string> config_cancelReboundActions;
         private static ConfigEntry<string> config_doReboundActions;
         
+        public static ConfigEntry<int> config_actionHoldTime;
+        
         public static ConfigEntry<bool> config_requireAllDRA;
         public static ConfigEntry<bool> config_requireAllCRA;
 
@@ -280,7 +282,13 @@ namespace Rebound
                 "Rebound Modifier Actions",     // The key of the configuration option in the configuration file
                 "",    // The default value
                 "A list of what additional player actions need to be pressed/held to do a Rebound, separated by commas. Note that jumping is always required. Acceptable values: slide, boost, spray, dance, trick1, trick2, trick3, trickAny, switchStyle, walk"); // Description of the option 
-              
+            
+            config_actionHoldTime = Config.Bind(
+                "3. Input",
+                "Action Hold Time",
+                2,
+                "How many frames the player must hold a Rebound Modifier Action to Rebound. Does not include the first frame the actions are pressed. If set to 0 or below, holding the action is not required.");
+
             config_requireAllDRA = Config.Bind(
                 "3. Input",          // The section under which the option is shown
                 "Require ALL Rebound Modifiers to Rebound",     // The key of the configuration option in the configuration file

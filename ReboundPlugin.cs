@@ -58,6 +58,7 @@ namespace Rebound
 
         public static List<string> cancelReboundActions = new List<string>();
         public static List<string> doReboundActions = new List<string>();
+        public static int doReboundActionsHoldTime = -1;
         
         public static float reboundTrailTime { get { return RBSettings.config_trailLength.Value + 0.000125f; } }
         public static float reboundTrailWidth { get { return RBSettings.config_trailWidth.Value + 0.000125f; } }
@@ -147,6 +148,13 @@ namespace Rebound
                     player.SetOutfit(Reptile.Core.Instance.SaveManager.CurrentSaveSlot.GetCharacterProgress(player.character).outfit);
                 }
             }
+
+            if (RBSettings.config_actionHoldTime.Value > 0 && ReboundPlugin.doReboundActions.Any()) {
+                bool doingRBActions = ReboundPlugin.ActionsPressed(ReboundPlugin.doReboundActions, RBSettings.config_requireAllDRA.Value);
+                if (doingRBActions) { doReboundActionsHoldTime++; } // 0 = just pressed, 1 = held for 1 extra frame, etc. 
+            } else {
+                doReboundActionsHoldTime = -1; 
+            }
         }
 
         public static bool CanRebound() {
@@ -160,6 +168,9 @@ namespace Rebound
         public static bool PlayerAttemptingRebound() {
             bool doingRBActions = ReboundPlugin.doReboundActions.Any() ? ReboundPlugin.ActionsPressed(ReboundPlugin.doReboundActions, RBSettings.config_requireAllDRA.Value) : true;
             bool cancelRBActions = ReboundPlugin.cancelReboundActions.Any() ? ReboundPlugin.ActionsPressed(ReboundPlugin.cancelReboundActions, RBSettings.config_requireAllCRA.Value) : false; 
+
+            if (RBSettings.config_actionHoldTime.Value > 0 && ReboundPlugin.doReboundActions.Any() 
+                && doReboundActionsHoldTime < RBSettings.config_actionHoldTime.Value) { return false; }
             
             return ReboundPlugin.landingVelocity.y < -ReboundPlugin.minVelocityToRebound 
                 && ReboundPlugin.landTime < ReboundPlugin.maxLandingTimeToRebound
