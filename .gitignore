@@ -10,7 +10,7 @@
 *.sln.docstates
 *.dll
 *.bat
-thunderstore/*/*.zip
+thunderstore/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
