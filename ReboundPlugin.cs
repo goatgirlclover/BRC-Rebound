@@ -151,7 +151,8 @@ namespace Rebound
 
             if (RBSettings.config_actionHoldTime.Value > 0 && ReboundPlugin.doReboundActions.Any()) {
                 bool doingRBActions = ReboundPlugin.ActionsPressed(ReboundPlugin.doReboundActions, RBSettings.config_requireAllDRA.Value);
-                if (doingRBActions) { doReboundActionsHoldTime++; } // 0 = just pressed, 1 = held for 1 extra frame, etc. 
+                if (doingRBActions) { doReboundActionsHoldTime += 1; } // 0 = just pressed, 1 = held for 1 extra frame, etc. 
+                else { doReboundActionsHoldTime = -1;  }
             } else {
                 doReboundActionsHoldTime = -1; 
             }
