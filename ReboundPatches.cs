@@ -187,7 +187,7 @@ namespace Rebound
             return false;
         }
 
-        [HarmonyPrefix]
+        /* [HarmonyPrefix]
         [HarmonyPatch(nameof(Player.PlayAnim))]
         public static bool PlayAnimPrefix(int newAnim, bool forceOverwrite, bool instant, float atTime, Player __instance) {
             if (!__instance.gameObject.activeSelf || (newAnim == __instance.curAnim && !forceOverwrite) 
@@ -207,7 +207,7 @@ namespace Rebound
 			}
             
             return true;
-        }
+        } */
     }
 
 }

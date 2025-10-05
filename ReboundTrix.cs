@@ -35,7 +35,7 @@ namespace Rebound
 
     internal class RBTrix {
         public static ConfigEntry<bool> boostedReboundsRespectTrickButtons;
-        public static ConfigEntry<float> forceAnimationBlending;
+        //public static ConfigEntry<float> forceAnimationBlending;
 
         public static ConfigEntry<bool> directionalTricks;
         public static ConfigEntry<float> directionalTrickDeadzone;
@@ -90,7 +90,7 @@ namespace Rebound
 
         private static void BindSettings(ConfigFile Config) {
             boostedReboundsRespectTrickButtons = Config.Bind("1. Options", "Multiple Tricks for Boosted Rebounds", true, "If enabled, holding a trick button while doing a Boosted Rebound will perform the boost trick associated with that button.");
-            forceAnimationBlending = Config.Bind("1. Options", "Force Smooth Animation Blending", 0f, "The speed at which the Rebound animation blends into the fall animation (bigger is slower). If set to 0 or below, many custom Rebound animations will not smoothly transition into the fall animation.");
+            ///forceAnimationBlending = Config.Bind("1. Options", "Force Smooth Animation Blending", 0f, "The speed at which the Rebound animation blends into the fall animation (bigger is slower). If set to 0 or below, many custom Rebound animations will not smoothly transition into the fall animation.");
 
             directionalTricks = Config.Bind("1. Options", "Directional Tricks", false, "If enabled, holding a specific direction with the left stick can activate custom Rebound animations the same way trick buttons do. Left maps to Trick 0, Up maps to Trick 1, and Right maps to Trick 2. Holding down or no direction maps to the default.");
             directionalTrickDeadzone = Config.Bind("1. Options", "Directional Tricks Deadzone", 0.8f, "How far you have to hold the stick a certain direction to activate a directional trick. The higher the number, the farther you must push the left stick. No effect if Directional Tricks are disabled.");

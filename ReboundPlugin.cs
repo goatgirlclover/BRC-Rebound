@@ -13,7 +13,7 @@ using System.IO;
 
 namespace Rebound
 {   
-    [BepInPlugin("goatgirl.Rebound", "Rebound", "3.1.1")]
+    [BepInPlugin("goatgirl.Rebound", "Rebound", "3.1.2")]
     [BepInProcess("Bomb Rush Cyberfunk.exe")]
     [BepInDependency("com.yuril.MovementPlus", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("ConfigTrixAirTricks", BepInDependency.DependencyFlags.SoftDependency)]
